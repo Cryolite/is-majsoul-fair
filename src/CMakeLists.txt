@@ -1,0 +1,27 @@
+# Copyright (c) 2024 Cryolite
+# SPDX-License-Identifier: MIT
+# This file is part of https://github.com/Cryolite/tsumonya
+
+add_library(common
+  common/throw.cpp
+  common/type_name.cpp
+  common/mahjongsoul.pb.cc)
+target_link_libraries(common
+  PRIVATE Boost::stacktrace_backtrace
+  PRIVATE Boost::headers
+  PRIVATE protobuf)
+
+add_library(core
+  core/interval_to_binary.cpp
+  core/permutation_to_interval.cpp
+  core/interval.cpp
+  core/integer.cpp)
+target_link_libraries(core
+  PRIVATE common
+  PRIVATE gmp)
+
+add_executable(paishan
+  paishan.cpp)
+target_link_libraries(paishan
+  PRIVATE common
+  PRIVATE Boost::headers)
