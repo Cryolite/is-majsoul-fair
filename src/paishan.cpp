@@ -285,7 +285,7 @@ void process(std::filesystem::path const &ph) {
       }
       std::vector<std::uint_fast8_t> const paishan = restorePaishan(record.paishan());
       if (game_record_version == 0u || game_record_version == 210715u) {
-        if (paishan.size() != 83u) {
+        if (paishan.size() != 83u && paishan.size() != 136u) {
           IS_MAJSOUL_FAIR_THROW<std::runtime_error>(_1) << uuid << ": " << paishan.size();
         }
       }
@@ -293,8 +293,7 @@ void process(std::filesystem::path const &ph) {
         IS_MAJSOUL_FAIR_THROW<std::logic_error>("A logic error.");
       }
 
-      std::cout << game_record_version
-                << '\t' << start_time
+      std::cout << start_time
                 << '\t' << uuid
                 << '\t' << toString(qipai0_)
                 << '\t' << toString(qipai1_)
