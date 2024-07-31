@@ -1,6 +1,12 @@
+ARG UBUNTU_VERSION="latest"
 ARG GMP_URL="https://ftp.gnu.org/gnu/gmp/gmp-6.3.0.tar.xz"
-FROM ubuntu:latest
+ARG ABSEIL_CPP_URL="https://github.com/abseil/abseil-cpp/releases/download/20240116.2/abseil-cpp-20240116.2.tar.gz"
+ARG PROTOBUF_URL="https://github.com/protocolbuffers/protobuf/releases/download/v27.2/protobuf-27.2.tar.gz"
+FROM ubuntu:${UBUNTU_VERSION}
+ARG UBUNTU_VERSION
 ARG GMP_URL
+ARG ABSEIL_CPP_URL
+ARG PROTOBUF_URL
 
 SHELL ["/bin/bash", "-c"]
 
@@ -17,9 +23,11 @@ RUN set -euxo pipefail; \
       libssl-dev \
       m4 \
       make \
-      protobuf-compiler \
       xz-utils; \
     apt-get clean && rm -rf /var/lib/apt/lists/*; \
+    if [[ $UBUNTU_VERSION == "jammy" ]]; then \
+      useradd -ms /bin/bash ubuntu; \
+    fi; \
     mkdir /workspace; \
     chown ubuntu:ubuntu /workspace
 
@@ -48,7 +56,7 @@ RUN set -euxo pipefail; \
 RUN set -euxo pipefail; \
     pushd /workspace; \
     GMP_TARBALL_NAME="$(basename "$GMP_URL")"; \
-    curl -LsSo "$GMP_TARBALL_NAME" "$GMP_URL"; \
+    curl -fLsSo "$GMP_TARBALL_NAME" "$GMP_URL"; \
     tar -xaf "$GMP_TARBALL_NAME"; \
     rm -f "$GMP_TARBALL_NAME"; \
     GMP_ROOT="$(readlink -e "$(basename "$GMP_TARBALL_NAME" .tar.xz)")"; \
@@ -63,7 +71,31 @@ RUN set -euxo pipefail; \
     rm -rf "$GMP_BUILD_DIR"; \
     rm -rf "$GMP_ROOT"; \
     popd
-    
+
+RUN set -euxo pipefail; \
+    pushd /workspace; \
+    ABSEIL_CPP_TARBALL_NAME="$(basename "$ABSEIL_CPP_URL")"; \
+    curl -fLsSo "$ABSEIL_CPP_TARBALL_NAME" "$ABSEIL_CPP_URL"; \
+    tar -xaf "$ABSEIL_CPP_TARBALL_NAME"; \
+    rm -f "$ABSEIL_CPP_TARBALL_NAME"; \
+    ABSEIL_CPP_ROOT="$(readlink -e "$(basename "$ABSEIL_CPP_TARBALL_NAME" .tar.gz)")"; \
+    PROTOBUF_TARBALL_NAME="$(basename "$PROTOBUF_URL")"; \
+    curl -fLsSo "$PROTOBUF_TARBALL_NAME" "$PROTOBUF_URL"; \
+    tar -xaf "$PROTOBUF_TARBALL_NAME"; \
+    rm -f "$PROTOBUF_TARBALL_NAME"; \
+    PROTOBUF_ROOT="$(readlink -e "$(basename "$PROTOBUF_TARBALL_NAME" .tar.gz)")"; \
+    pushd "$PROTOBUF_ROOT"; \
+    pushd third_party; \
+    rmdir abseil-cpp; \
+    ln -s "$ABSEIL_CPP_ROOT" abseil-cpp; \
+    popd; \
+    cmake . -DCMAKE_CXX_STANDARD=14 -Dprotobuf_BUILD_TESTS=OFF -DCMAKE_INSTALL_PREFIX=/home/ubuntu/.local; \
+    cmake --build . --target install; \
+    popd; \
+    rm -rf "$PROTOBUF_ROOT"; \
+    rm -rf "$ABSEIL_CPP_ROOT"; \
+    popd
+
 RUN set -euxo pipefail; \
     /workspace/prerequisites/boost/download --debug --source-dir /workspace/boost; \
     /workspace/prerequisites/boost/build --debug --source-dir /workspace/boost --prefix /home/ubuntu/.local -- \
