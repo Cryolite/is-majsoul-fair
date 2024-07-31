@@ -57,6 +57,9 @@ std::uint_fast8_t decodeTile(char const number, char const color)
 
 std::vector<std::uint_fast8_t> restoreQipai(std::vector<std::string> const &qipai)
 {
+  if (qipai.size() == 0u) {
+    return {};
+  }
   if (qipai.size() != 14u && qipai.size() != 13u) {
     IS_MAJSOUL_FAIR_THROW<std::runtime_error>(_1) << qipai.size();
   }
@@ -101,14 +104,19 @@ std::string toString(std::vector<std::uint_fast8_t> const &tiles)
   return std::move(oss).str();
 }
 
-void process(std::filesystem::path const &ph) {
-  std::string const data = [&ph]() -> std::string {
+void process(std::filesystem::path const &ph, std::string uuid) {
+  std::string const data = [&]() -> std::string {
     std::ifstream ifs(ph, std::ios_base::in | std::ios_base::binary);
-    for (std::size_t i = 0; i < 3u; ++i) {
-      std::ifstream::int_type const c = ifs.get();
-      if (c == std::ifstream::traits_type::eof()) {
-        // Some files are empty.
-        return "";
+    if (!ifs) {
+      IS_MAJSOUL_FAIR_THROW<std::runtime_error>(_1) << ph.string() << ": Failed to open.";
+    }
+    if (uuid.empty()) {
+      for (std::size_t i = 0; i < 3u; ++i) {
+        std::ifstream::int_type const c = ifs.get();
+        if (c == std::ifstream::traits_type::eof()) {
+          // Some files are empty.
+          return "";
+	}
       }
     }
     std::ostringstream oss;
@@ -121,20 +129,24 @@ void process(std::filesystem::path const &ph) {
   }
 
   lq::Wrapper wrapper;
-  wrapper.ParseFromString(data);
-  if (wrapper.name() != "") {
-    IS_MAJSOUL_FAIR_THROW<std::runtime_error>(_1) << ph << ": " << wrapper.name();
+  if (uuid.empty()) {
+    wrapper.ParseFromString(data);
+    if (wrapper.name() != "") {
+      IS_MAJSOUL_FAIR_THROW<std::runtime_error>(_1) << ph << ": " << wrapper.name();
+    }
+
+    lq::ResGameRecord msg0;
+    msg0.ParseFromString(wrapper.data());
+    uuid = msg0.head().uuid();
+
+    wrapper.ParseFromString(msg0.data());
   }
-
-  lq::ResGameRecord msg0;
-  msg0.ParseFromString(wrapper.data());
-
-  std::uint_fast32_t const start_time = msg0.head().start_time();
-  std::string const uuid = msg0.head().uuid();
-
-  wrapper.ParseFromString(msg0.data());
+  else {
+    wrapper.ParseFromString(data);
+  }
   if (wrapper.name() != ".lq.GameDetailRecords") {
     // The version of game records before the maintenance on 2020/??/?? (JST).
+    std::cout << wrapper.name() << std::endl;
     return;
   }
 
@@ -155,8 +167,7 @@ void process(std::filesystem::path const &ph) {
 
   auto const &records_0 = msg1.records();
   auto const &records_210715 = msg1.actions();
-  std::size_t const record_size = [&]() -> std::size_t
-  {
+  std::size_t const record_size = [&]() -> std::size_t {
     if (game_record_version == 0u) {
       if (records_210715.size() != 0u) {
         IS_MAJSOUL_FAIR_THROW<std::runtime_error>("A broken data.");
@@ -177,8 +188,7 @@ void process(std::filesystem::path const &ph) {
   std::size_t ben;
 
   for (std::size_t record_count = 0u; record_count < record_size; ++record_count) {
-    std::string const &r = [&]() -> std::string const &
-    {
+    std::string const &r = [&]() -> std::string const & {
       if (game_record_version == 0u) {
         return records_0[record_count];
       }
@@ -280,12 +290,12 @@ void process(std::filesystem::path const &ph) {
         IS_MAJSOUL_FAIR_THROW<std::runtime_error>(_1) << uuid << ": " << qipai2_.size();
       }
       std::vector<std::uint_fast8_t> const qipai3_ = restoreQipai(qipai3);
-      if (qipai3_.size() != 13u) {
+      if (qipai3_.size() != 13u && qipai3_.size() != 0u) {
         IS_MAJSOUL_FAIR_THROW<std::runtime_error>(_1) << uuid << ": " << qipai3_.size();
       }
       std::vector<std::uint_fast8_t> const paishan = restorePaishan(record.paishan());
       if (game_record_version == 0u || game_record_version == 210715u) {
-        if (paishan.size() != 83u && paishan.size() != 136u) {
+        if (paishan.size() != 83u && paishan.size() != 136u && paishan.size() != 68u && paishan.size() != 108u) {
           IS_MAJSOUL_FAIR_THROW<std::runtime_error>(_1) << uuid << ": " << paishan.size();
         }
       }
@@ -293,14 +303,11 @@ void process(std::filesystem::path const &ph) {
         IS_MAJSOUL_FAIR_THROW<std::logic_error>("A logic error.");
       }
 
-      std::cout << start_time
-                << '\t' << uuid
-                << '\t' << toString(qipai0_)
-                << '\t' << toString(qipai1_)
-                << '\t' << toString(qipai2_)
-                << '\t' << toString(qipai3_)
-                << '\t' << toString(paishan)
-                << '\n';
+      std::cout << uuid << '\t' << toString(qipai0_) << '\t' << toString(qipai1_) << '\t' << toString(qipai2_);
+      if (qipai3_.size() != 0u) {
+        std::cout << '\t' << toString(qipai3_);
+      }
+      std::cout << '\t' << toString(paishan) << '\n';
       return;
     }
     else if (wrapper.name() == ".lq.RecordNoTile") {
@@ -324,14 +331,15 @@ void walk(std::filesystem::path const &ph, std::string const &suffix) {
       std::filesystem::path const path = iter->path();
       std::string const path_str = path.string();
       if (suffix.empty()) {
-        process(path);
+        process(path, "");
         continue;
       }
       if (path_str.size() < suffix.size()) {
         continue;
       }
       if (path_str.compare(path_str.size() - suffix.size(), suffix.size(), suffix) == 0) {
-        process(path);
+        std::string const filename = path.filename().string();
+        process(path, filename.substr(0, filename.size() - suffix.size()));
         continue;
       }
     }
