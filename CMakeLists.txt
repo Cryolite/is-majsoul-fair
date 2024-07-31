@@ -90,6 +90,9 @@ else()
   set(Boost_USE_RELEASE_LIBS ON)
 endif()
 
+find_package(absl REQUIRED)
+find_package(Protobuf REQUIRED)
+
 set(BOOST_ROOT "$ENV{HOME}/.local")
 find_package(Boost
   REQUIRED

@@ -9,10 +9,14 @@ add_library(common
 target_link_libraries(common
   PRIVATE Boost::stacktrace_backtrace
   PRIVATE Boost::headers
-  PRIVATE protobuf)
+  PRIVATE ${Protobuf_LIBRARIES}
+  PRIVATE absl::log_internal_check_op
+  PRIVATE absl::log_internal_conditions
+  PRIVATE absl::raw_hash_set
+  PRIVATE absl::statusor
+  PRIVATE utf8_validity)
 
 add_library(core
-  core/interval_to_binary.cpp
   core/permutation_to_interval.cpp
   core/interval.cpp
   core/integer.cpp)
