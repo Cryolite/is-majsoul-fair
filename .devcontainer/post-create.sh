@@ -12,13 +12,14 @@ if [[ -t 1 ]] && type -t tput >/dev/null; then
 fi
 
 GMP_URL='https://ftp.gnu.org/gnu/gmp/gmp-6.3.0.tar.xz'
+ABSEIL_CPP_URL="https://github.com/abseil/abseil-cpp/releases/download/20240116.2/abseil-cpp-20240116.2.tar.gz"
+PROTOBUF_URL="https://github.com/protocolbuffers/protobuf/releases/download/v27.2/protobuf-27.2.tar.gz"
 
 # Install prerequisite packages.
 sudo apt-get -y update
 sudo apt-get -y dist-upgrade
 sudo apt-get -y install \
-    m4 \
-    protobuf-compiler
+    m4
 sudo apt-get clean
 sudo rm -rf /var/lib/apt/lists/*
 sudo chown -R vscode:vscode /workspaces
@@ -27,6 +28,7 @@ pushd /workspaces
 git clone https://github.com/Cryolite/prerequisites
 popd
 
+# Install GCC.
 /workspaces/prerequisites/gcc/install --debug --prefix "$HOME/.local"
 echo 'export C_INCLUDE_PATH="$HOME/.local/include${C_INCLUDE_PATH:+:$C_INCLUDE_PATH}"' >> "$HOME/.bashrc"
 echo 'export C_INCLUDE_PATH="$HOME/.local/include${C_INCLUDE_PATH:+:$C_INCLUDE_PATH}"' >> "$HOME/.profile"
@@ -56,9 +58,10 @@ sed -i -e 's/make check/echo make check/' /workspaces/prerequisites/libbacktrace
 
 /workspaces/prerequisites/cmake/install --debug --prefix "$HOME/.local"
 
+# Install GMP.
 pushd /workspaces
 GMP_TARBALL_NAME="$(basename "$GMP_URL")"
-curl -LsSo "$GMP_TARBALL_NAME" "$GMP_URL"
+curl -fLsSo "$GMP_TARBALL_NAME" "$GMP_URL"
 tar -xaf "$GMP_TARBALL_NAME"
 rm -f "$GMP_TARBALL_NAME"
 GMP_ROOT="$(readlink -e "$(basename "$GMP_TARBALL_NAME" .tar.xz)")"
@@ -74,6 +77,31 @@ rm -rf "$GMP_BUILD_DIR"
 rm -rf "$GMP_ROOT"
 popd
 
+# Install Protocol Buffers.
+pushd /workspaces
+ABSEIL_TARBALL_NAME="$(basename "$ABSEIL_CPP_URL")"
+curl -fLsSo "$ABSEIL_TARBALL_NAME" "$ABSEIL_CPP_URL"
+tar -xaf "$ABSEIL_TARBALL_NAME"
+rm -f "$ABSEIL_TARBALL_NAME"
+ABSEIL_CPP_ROOT="$(readlink -e "$(basename "$ABSEIL_TARBALL_NAME" .tar.gz)")"
+PROTOBUF_TARBALL_NAME="$(basename "$PROTOBUF_URL")"
+curl -fLsSo "$PROTOBUF_TARBALL_NAME" "$PROTOBUF_URL"
+tar -xaf "$PROTOBUF_TARBALL_NAME"
+rm -f "$PROTOBUF_TARBALL_NAME"
+PROTOBUF_ROOT="$(readlink -e "$(basename "$PROTOBUF_TARBALL_NAME" .tar.gz)")"
+pushd "$PROTOBUF_ROOT"
+pushd third_party
+rmdir abseil-cpp
+ln -s "$ABSEIL_CPP_ROOT" abseil-cpp
+popd
+cmake . -DCMAKE_CXX_STANDARD=14 -Dprotobuf_BUILD_TESTS=OFF -DCMAKE_INSTALL_PREFIX="$HOME/.local"
+cmake --build . --target install
+popd
+rm -rf "$PROTOBUF_ROOT"
+rm -rf "$ABSEIL_CPP_ROOT"
+popd
+
+# Install Boost.
 /workspaces/prerequisites/boost/download --debug --source-dir /workspaces/boost
 /workspaces/prerequisites/boost/build --debug --source-dir /workspaces/boost --prefix "$HOME/.local" -- \
   -d+2 --with-headers --with-stacktrace --build-type=complete --layout=tagged \
