@@ -17,6 +17,7 @@ target_link_libraries(common
   PRIVATE utf8_validity)
 
 add_library(core
+  core/interval_to_binary.cpp
   core/permutation_to_interval.cpp
   core/interval.cpp
   core/integer.cpp)
