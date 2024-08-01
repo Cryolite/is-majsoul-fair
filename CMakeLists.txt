@@ -1,3 +1,7 @@
+# Copyright (c) 2024 Cryolite
+# SPDX-License-Identifier: MIT
+# This file is part of https://github.com/Cryolite/tsumonya
+
 cmake_minimum_required(VERSION 3.25.0)
 project(is-majsoul-fair)
 
@@ -93,7 +97,6 @@ endif()
 find_package(absl REQUIRED)
 find_package(Protobuf REQUIRED)
 
-set(BOOST_ROOT "$ENV{HOME}/.local")
 find_package(Boost
   REQUIRED
   COMPONENTS stacktrace_backtrace)

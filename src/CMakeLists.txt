@@ -16,14 +16,6 @@ target_link_libraries(common
   PRIVATE absl::statusor
   PRIVATE utf8_validity)
 
-add_library(core
-  core/permutation_to_interval.cpp
-  core/interval.cpp
-  core/integer.cpp)
-target_link_libraries(core
-  PRIVATE common
-  PRIVATE gmp)
-
 add_executable(paishan
   paishan.cpp)
 target_link_libraries(paishan
