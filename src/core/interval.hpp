@@ -1,3 +1,7 @@
+// Copyright (c) 2024 Cryolite
+// SPDX-License-Identifier: MIT
+// This file is part of https://github.com/Cryolite/tsumonya
+
 #if !defined(CORE_INTERVAL_HPP)
 #define CORE_INTERVAL_HPP
 
@@ -11,8 +15,8 @@ class Interval
 public:
   Interval(
     IsMajsoulFair::Integer const &denominator,
-    IsMajsoulFair::Integer const &lower,
-    IsMajsoulFair::Integer const &upper);
+    IsMajsoulFair::Integer const &lower_numerator,
+    IsMajsoulFair::Integer const &upper_numerator);
 
   Interval(Interval const &other);
 
@@ -34,8 +38,8 @@ public:
 
 private:
   IsMajsoulFair::Integer denominator_;
-  IsMajsoulFair::Integer lower_;
-  IsMajsoulFair::Integer upper_;
+  IsMajsoulFair::Integer lower_numerator_;
+  IsMajsoulFair::Integer upper_numerator_;
 }; // class Interval
 
 void swap(Interval &lhs, Interval &rhs) noexcept;
