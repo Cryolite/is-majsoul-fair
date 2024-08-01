@@ -1,3 +1,7 @@
+// Copyright (c) 2024 Cryolite
+// SPDX-License-Identifier: MIT
+// This file is part of https://github.com/Cryolite/tsumonya
+
 #include "permutation_to_interval.hpp"
 
 #include "interval.hpp"
@@ -6,6 +10,7 @@
 #include <vector>
 #include <array>
 #include <cstdint>
+
 
 namespace IsMajsoulFair{
 
@@ -19,8 +24,8 @@ Interval permutationToInterval(std::vector<std::uint_fast8_t> const &permutation
   };
 
   IsMajsoulFair::Integer denominator(1ul);
-  IsMajsoulFair::Integer lower(0ul);
-  IsMajsoulFair::Integer upper(1ul);
+  IsMajsoulFair::Integer lower_numerator(0ul);
+  IsMajsoulFair::Integer upper_numerator(1ul);
 
   {
     unsigned long denominator_factor = 136ul;
@@ -38,17 +43,17 @@ Interval permutationToInterval(std::vector<std::uint_fast8_t> const &permutation
       }
 
       denominator *= denominator_factor;
-      lower *= denominator_factor;
-      upper *= denominator_factor;
+      lower_numerator *= denominator_factor;
+      upper_numerator *= denominator_factor;
 
-      lower += offset;
-      upper += offset + num_tiles[tile];
+      lower_numerator += offset;
+      upper_numerator += offset + num_tiles[tile];
 
       --num_tiles[tile];
     }
   }
 
-  return Interval{denominator, lower, upper};
+  return {denominator, lower_numerator, upper_numerator};
 }
 
 } // namespace IsMajsoulFair

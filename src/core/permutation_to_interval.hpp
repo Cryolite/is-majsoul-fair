@@ -1,3 +1,7 @@
+// Copyright (c) 2024 Cryolite
+// SPDX-License-Identifier: MIT
+// This file is part of https://github.com/Cryolite/tsumonya
+
 #if !defined(CORE_PERMUTATION_TO_INTERVAL_HPP)
 #define CORE_PERMUTATION_TO_INTERVAL_HPP
 
