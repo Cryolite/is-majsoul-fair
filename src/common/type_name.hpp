@@ -1,3 +1,7 @@
+// Copyright (c) 2024 Cryolite
+// SPDX-License-Identifier: MIT
+// This file is part of https://github.com/Cryolite/tsumonya
+
 #if !defined(COMMON_TYPE_NAME_HPP_INCLUDE_GUARD)
 #define COMMON_TYPE_NAME_HPP_INCLUDE_GUARD
 

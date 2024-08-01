@@ -1,3 +1,7 @@
+# Copyright (c) 2024 Cryolite
+# SPDX-License-Identifier: MIT
+# This file is part of https://github.com/Cryolite/tsumonya
+
 ARG UBUNTU_VERSION="latest"
 ARG GMP_URL="https://ftp.gnu.org/gnu/gmp/gmp-6.3.0.tar.xz"
 ARG ABSEIL_CPP_URL="https://github.com/abseil/abseil-cpp/releases/download/20240116.2/abseil-cpp-20240116.2.tar.gz"
