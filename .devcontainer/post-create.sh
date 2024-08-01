@@ -102,16 +102,19 @@ rm -rf "$ABSEIL_CPP_ROOT"
 popd
 
 # Install Boost.
+# `boost.stacktrace.from_exception=off` is required for AArch64.
 /workspaces/prerequisites/boost/download --debug --source-dir /workspaces/boost
 /workspaces/prerequisites/boost/build --debug --source-dir /workspaces/boost --prefix "$HOME/.local" -- \
   -d+2 --with-headers --with-stacktrace --build-type=complete --layout=tagged \
   toolset=gcc variant=debug threading=multi link=shared runtime-link=shared \
   cxxflags=-D_GLIBCXX_DEBUG cxxflags=-D_GLIBCXX_DEBUG_PEDANTIC \
   cflags=-fsanitize=address cxxflags=-fsanitize=address linkflags=-fsanitize=address \
-  cflags=-fsanitize=undefined cxxflags=-fsanitize=undefined linkflags=-fsanitize=undefined
+  cflags=-fsanitize=undefined cxxflags=-fsanitize=undefined linkflags=-fsanitize=undefined \
+  boost.stacktrace.from_exception=off
 /workspaces/prerequisites/boost/build --debug --source-dir /workspaces/boost --prefix "$HOME/.local" -- \
   -d+2 --with-headers --with-stacktrace --build-type=complete --layout=tagged \
-  toolset=gcc variant=release threading=multi link=shared runtime-link=shared
+  toolset=gcc variant=release threading=multi link=shared runtime-link=shared \
+  boost.stacktrace.from_exception=off
 rm -rf /workspaces/boost
 
 pushd /workspaces/is-majsoul-fair/src/common
