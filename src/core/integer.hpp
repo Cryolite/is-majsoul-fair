@@ -1,3 +1,7 @@
+// Copyright (c) 2024 Cryolite
+// SPDX-License-Identifier: MIT
+// This file is part of https://github.com/Cryolite/tsumonya
+
 #if !defined(CORE_INTEGER_HPP)
 #define CORE_INTEGER_HPP
 
@@ -5,6 +9,8 @@
 
 
 namespace IsMajsoulFair{
+
+class IntegerRandomState;
 
 class Integer
 {
@@ -30,6 +36,14 @@ public:
   Integer &operator=(unsigned long value);
 
   Integer &operator=(long value);
+
+  Integer &operator++();
+
+  Integer operator++(int);
+
+  Integer &operator--();
+
+  Integer operator--(int);
 
   Integer &operator+=(Integer const &rhs);
 
@@ -67,9 +81,21 @@ public:
 
   Integer operator/(unsigned long rhs) const;
 
+  Integer &operator%=(Integer const &rhs);
+
+  Integer &operator%=(unsigned long rhs);
+
+  Integer operator%(Integer const &rhs) const;
+
+  Integer operator%(unsigned long rhs) const;
+
   Integer &inplacePow(unsigned long exponent);
 
   Integer pow(unsigned long exponent) const;
+
+  Integer &setToRandom(IntegerRandomState &state, Integer const &lower, Integer const &upper);
+
+  explicit operator unsigned long() const;
 
   bool operator==(Integer const &rhs) const;
 
@@ -141,6 +167,37 @@ bool operator>(long lhs, Integer const &rhs);
 bool operator>=(unsigned long lhs, Integer const &rhs);
 
 bool operator>=(long lhs, Integer const &rhs);
+
+class IntegerRandomState
+{
+private:
+  friend class Integer;
+
+public:
+  IntegerRandomState();
+
+  IntegerRandomState(IntegerRandomState const &) = delete;
+
+  IntegerRandomState(IntegerRandomState &&other) noexcept;
+
+  void swap(IntegerRandomState &other) noexcept;
+
+  void swap(IntegerRandomState &&other) noexcept;
+
+  IntegerRandomState &operator=(IntegerRandomState const &) = delete;
+
+  IntegerRandomState &operator=(IntegerRandomState &&other) noexcept;
+
+private:
+  class Impl_;
+  std::shared_ptr<Impl_> p_impl_;
+}; // class IntegerRandomNumberGenerator
+
+void swap(IntegerRandomState &lhs, IntegerRandomState &rhs) noexcept;
+
+void swap(IntegerRandomState &lhs, IntegerRandomState &&rhs) noexcept;
+
+void swap(IntegerRandomState &&lhs, IntegerRandomState &rhs) noexcept;
 
 } // namespace IsMajsoulFair
 

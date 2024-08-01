@@ -1,3 +1,7 @@
+// Copyright (c) 2024 Cryolite
+// SPDX-License-Identifier: MIT
+// This file is part of https://github.com/Cryolite/tsumonya
+
 #include "integer.hpp"
 
 #include "../common/throw.hpp"
@@ -84,9 +88,31 @@ public:
     return *this;
   }
 
+  Impl_ &operator%=(Impl_ const &rhs)
+  {
+    mpz_tdiv_r(value_, value_, rhs.value_);
+    return *this;
+  }
+
+  Impl_ &operator%=(unsigned long const rhs)
+  {
+    mpz_tdiv_r_ui(value_, value_, rhs);
+    return *this;
+  }
+
   void inplacePow(unsigned long const exponent)
   {
     mpz_pow_ui(value_, value_, exponent);
+  }
+
+  void setToRandom(gmp_randstate_t state, Impl_ const &upper)
+  {
+    mpz_urandomm(value_, state, upper.value_);
+  }
+
+  explicit operator unsigned long() const
+  {
+    return mpz_get_ui(value_);
   }
 
   bool operator==(Impl_ const &rhs) const
@@ -127,6 +153,36 @@ public:
 private:
   mpz_t value_;
 }; // class Integer::Impl_
+
+class IntegerRandomState::Impl_
+{
+public:
+  Impl_()
+  {
+    gmp_randinit_mt(state_);
+  }
+
+  Impl_(Impl_ const &other) = delete;
+
+  Impl_(Impl_ &&other) = delete;
+
+  Impl_ &operator=(Impl_ const &other) = delete;
+
+  Impl_ &operator=(Impl_ &&other) = delete;
+
+  ~Impl_()
+  {
+    gmp_randclear(state_);
+  }
+
+  gmp_randstate_t &get() noexcept
+  {
+    return state_;
+  }
+
+private:
+  gmp_randstate_t state_;
+}; // class IntegerRandomState::Impl_
 
 Integer::Integer()
   : p_impl_(std::make_shared<Impl_>())
@@ -182,6 +238,36 @@ Integer &Integer::operator=(long const value)
 {
   Integer(value).swap(*this);
   return *this;
+}
+
+Integer &Integer::operator++()
+{
+  if (!p_impl_) {
+    IS_MAJSOUL_FAIR_THROW<std::invalid_argument>("`p_impl_` is `nullptr`.");
+  }
+  return *this += 1ul;
+}
+
+Integer Integer::operator++(int)
+{
+  Integer result(*this);
+  ++*this;
+  return result;
+}
+
+Integer &Integer::operator--()
+{
+  if (!p_impl_) {
+    IS_MAJSOUL_FAIR_THROW<std::invalid_argument>("`p_impl_` is `nullptr`.");
+  }
+  return *this -= 1ul;
+}
+
+Integer Integer::operator--(int)
+{
+  Integer result(*this);
+  --*this;
+  return result;
 }
 
 Integer &Integer::operator+=(Integer const &rhs)
@@ -322,6 +408,37 @@ Integer Integer::operator/(unsigned long const rhs) const
   return Integer(*this) /= rhs;
 }
 
+Integer &Integer::operator%=(Integer const &rhs)
+{
+  if (!p_impl_) {
+    IS_MAJSOUL_FAIR_THROW<std::invalid_argument>("`p_impl_` is `nullptr`.");
+  }
+  if (!rhs.p_impl_) {
+    IS_MAJSOUL_FAIR_THROW<std::invalid_argument>("`rhs.p_impl_` is `nullptr`.");
+  }
+  *p_impl_ %= *rhs.p_impl_;
+  return *this;
+}
+
+Integer &Integer::operator%=(unsigned long const rhs)
+{
+  if (!p_impl_) {
+    IS_MAJSOUL_FAIR_THROW<std::invalid_argument>("`p_impl_` is `nullptr`.");
+  }
+  *p_impl_ %= rhs;
+  return *this;
+}
+
+Integer Integer::operator%(Integer const &rhs) const
+{
+  return Integer(*this) %= rhs;
+}
+
+Integer Integer::operator%(unsigned long const rhs) const
+{
+  return Integer(*this) %= rhs;
+}
+
 Integer &Integer::inplacePow(unsigned long const exponent)
 {
   if (!p_impl_) {
@@ -337,6 +454,35 @@ Integer Integer::pow(unsigned long const exponent) const
     IS_MAJSOUL_FAIR_THROW<std::invalid_argument>("`p_impl_` is `nullptr`.");
   }
   return Integer(*this).inplacePow(exponent);
+}
+
+Integer &Integer::setToRandom(
+  IntegerRandomState &state, Integer const &lower, Integer const &upper)
+{
+  if (!p_impl_) {
+    IS_MAJSOUL_FAIR_THROW<std::invalid_argument>("`p_impl_` is `nullptr`.");
+  }
+  if (!state.p_impl_) {
+    IS_MAJSOUL_FAIR_THROW<std::invalid_argument>("`state.p_impl_` is `nullptr`.");
+  }
+  Integer const range = upper - lower;
+  p_impl_->setToRandom(state.p_impl_->get(), *range.p_impl_);
+
+  return *this += lower;
+}
+
+Integer::operator unsigned long() const
+{
+  if (!p_impl_) {
+    IS_MAJSOUL_FAIR_THROW<std::invalid_argument>("`p_impl_` is `nullptr`.");
+  }
+  if (*this < 0ul) {
+    IS_MAJSOUL_FAIR_THROW<std::underflow_error>("Underflow occurred.");
+  }
+  if (*this > Integer(ULONG_MAX)) {
+    IS_MAJSOUL_FAIR_THROW<std::overflow_error>("Overflow occurred.");
+  }
+  return static_cast<unsigned long>(*p_impl_);
 }
 
 bool Integer::operator==(Integer const &rhs) const
@@ -526,6 +672,21 @@ bool operator>=(unsigned long const lhs, Integer const &rhs)
 bool operator>=(long const lhs, Integer const &rhs)
 {
   return rhs <= lhs;
+}
+
+void swap(IntegerRandomState &lhs, IntegerRandomState &rhs) noexcept
+{
+  lhs.swap(rhs);
+}
+
+void swap(IntegerRandomState &lhs, IntegerRandomState &&rhs) noexcept
+{
+  lhs.swap(rhs);
+}
+
+void swap(IntegerRandomState &&lhs, IntegerRandomState &rhs) noexcept
+{
+  lhs.swap(rhs);
 }
 
 } // namespace IsMajsoulFair
