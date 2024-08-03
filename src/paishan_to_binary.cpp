@@ -1,3 +1,7 @@
+// Copyright (c) 2024 Cryolite
+// SPDX-License-Identifier: MIT
+// This file is part of https://github.com/Cryolite/is-majsoul-fair.
+
 #include "core/interval_to_binary.hpp"
 #include "core/permutation_to_interval.hpp"
 #include "core/interval.hpp"

@@ -1,6 +1,6 @@
 // Copyright (c) 2024 Cryolite
 // SPDX-License-Identifier: MIT
-// This file is part of https://github.com/Cryolite/tsumonya
+// This file is part of https://github.com/Cryolite/is-majsoul-fair.
 
 #if !defined(CORE_PERMUTATION_TO_INTERVAL_HPP)
 #define CORE_PERMUTATION_TO_INTERVAL_HPP
