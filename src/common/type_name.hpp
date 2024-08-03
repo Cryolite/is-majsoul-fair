@@ -1,6 +1,6 @@
 // Copyright (c) 2024 Cryolite
 // SPDX-License-Identifier: MIT
-// This file is part of https://github.com/Cryolite/tsumonya
+// This file is part of https://github.com/Cryolite/is-majsoul-fair.
 
 #if !defined(COMMON_TYPE_NAME_HPP_INCLUDE_GUARD)
 #define COMMON_TYPE_NAME_HPP_INCLUDE_GUARD
