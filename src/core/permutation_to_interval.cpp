@@ -7,6 +7,7 @@
 #include "interval.hpp"
 #include "integer.hpp"
 #include "../common/throw.hpp"
+#include <numeric>
 #include <vector>
 #include <array>
 #include <cstdint>
@@ -37,17 +38,12 @@ Interval permutationToInterval(std::vector<std::uint_fast8_t> const &permutation
       if (num_tiles[tile] == 0u) {
         IS_MAJSOUL_FAIR_THROW<std::invalid_argument>("An invalid `permutation` was passed.");
       }
-      std::uint_fast8_t offset = 0u;
-      for (std::uint_fast8_t j = 0u; j < tile; ++j) {
-        offset += num_tiles[j];
-      }
+      unsigned long offset = std::accumulate(num_tiles.begin(), num_tiles.begin() + tile, 0u);
 
+      IsMajsoulFair::Integer difference = upper_numerator - lower_numerator;
+      lower_numerator = lower_numerator * denominator_factor + difference * offset;
+      upper_numerator = lower_numerator + difference * static_cast<unsigned long>(num_tiles[tile]);
       denominator *= denominator_factor;
-      lower_numerator *= denominator_factor;
-      upper_numerator *= denominator_factor;
-
-      lower_numerator += offset;
-      upper_numerator += offset + num_tiles[tile];
 
       --num_tiles[tile];
     }

@@ -18,8 +18,7 @@ namespace IsMajsoulFair{
 namespace{
 
 std::pair<IsMajsoulFair::Integer, IsMajsoulFair::Integer> getCoveringBinaryInterval(
-  IsMajsoulFair::Interval const &interval,
-  std::size_t const num_bits)
+  IsMajsoulFair::Interval const &interval, std::size_t const num_bits)
 {
   IsMajsoulFair::Integer const binary_denominator = [&]() {
     IsMajsoulFair::Integer term(2ul);
@@ -30,10 +29,10 @@ std::pair<IsMajsoulFair::Integer, IsMajsoulFair::Integer> getCoveringBinaryInter
   IsMajsoulFair::Integer binary_lower_numerator(0ul);
   IsMajsoulFair::Integer binary_lower_numerator_term = interval.getDenominator() * binary_denominator;
   for (std::size_t i = 0u; i < num_bits; ++i) {
+    binary_lower_numerator_term /= 2ul;
     if (binary_lower_numerator + binary_lower_numerator_term <= original_lower_numerator) {
       binary_lower_numerator += binary_lower_numerator_term;
     }
-    binary_lower_numerator_term /= 2ul;
   }
   if (binary_lower_numerator <= original_lower_numerator && original_lower_numerator < binary_lower_numerator + interval.getDenominator()) {
     // OK
@@ -43,22 +42,39 @@ std::pair<IsMajsoulFair::Integer, IsMajsoulFair::Integer> getCoveringBinaryInter
   }
 
   IsMajsoulFair::Integer const original_upper_numerator = interval.getUpperNumerator() * binary_denominator;
-  IsMajsoulFair::Integer binary_upper_numerator(0ul);
+  IsMajsoulFair::Integer binary_upper_numerator = interval.getDenominator() * binary_denominator;
   IsMajsoulFair::Integer binary_upper_numerator_term = interval.getDenominator() * binary_denominator;
   for (std::size_t i = 0u; i < num_bits; ++i) {
-    if (binary_upper_numerator + binary_upper_numerator_term <= original_upper_numerator) {
-      binary_upper_numerator += binary_upper_numerator_term;
-    }
     binary_upper_numerator_term /= 2ul;
+    if (binary_upper_numerator - binary_upper_numerator_term >= original_upper_numerator) {
+      binary_upper_numerator -= binary_upper_numerator_term;
+    }
   }
   if (binary_upper_numerator < original_upper_numerator + interval.getDenominator() && original_upper_numerator <= binary_upper_numerator) {
     // OK
   }
   else {
+    if (binary_upper_numerator - interval.getDenominator() >= original_upper_numerator) {
+      IS_MAJSOUL_FAIR_THROW<std::logic_error>("A logic error.");
+    }
     IS_MAJSOUL_FAIR_THROW<std::logic_error>("A logic error.");
   }
 
   return {binary_lower_numerator / interval.getDenominator(), binary_upper_numerator / interval.getDenominator()};
+}
+
+std::vector<unsigned char> integerToBinary(IsMajsoulFair::Integer const &integer, std::size_t const num_bits)
+{
+  std::vector<unsigned char> result;
+  {
+    IsMajsoulFair::Integer value = integer;
+    for (std::size_t i = 0u; i < num_bits; ++i) {
+      unsigned char const bit = static_cast<unsigned long>(value % 2ul);
+      value /= 2ul;
+      result.push_back(bit);
+    }
+  }
+  return result;
 }
 
 } // namespace <unnamed>
@@ -69,6 +85,10 @@ std::vector<unsigned char> intervalToBinary(
   auto const [lower_binary, upper_binary] = getCoveringBinaryInterval(interval, num_bits);
   if (upper_binary - lower_binary > IsMajsoulFair::Integer(SIZE_MAX)) {
     IS_MAJSOUL_FAIR_THROW<std::invalid_argument>("`num_bits` is too large.");
+  }
+
+  if (upper_binary - lower_binary == 1ul) {
+    return integerToBinary(lower_binary, num_bits);
   }
 
   IsMajsoulFair::Integer const binary_denominator = [&]() {
@@ -107,19 +127,7 @@ std::vector<unsigned char> intervalToBinary(
     return Integer(0ul);
   }();
 
-  std::vector<unsigned char> result;
-  for (std::size_t i = 0u; i < num_bits; ++i) {
-    unsigned char const bit = static_cast<unsigned long>(result_as_integer % 2ul);
-    result_as_integer /= 2ul;
-    std::size_t const index = i / 8u;
-    std::size_t const offset = 7u - i % 8u;
-    if (result.size() <= index) {
-      result.resize(index + 1u, 0u);
-    }
-    result[index] |= bit << offset;
-  }
-
-  return result;
+  return integerToBinary(result_as_integer, num_bits);
 }
 
 } // namespace IsMajsoulFair

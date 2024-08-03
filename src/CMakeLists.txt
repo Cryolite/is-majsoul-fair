@@ -30,3 +30,10 @@ add_executable(paishan
 target_link_libraries(paishan
   PRIVATE common
   PRIVATE Boost::headers)
+
+add_executable(paishan_to_binary
+  paishan_to_binary.cpp)
+target_link_libraries(paishan_to_binary
+  PRIVATE core
+  PRIVATE common
+  PRIVATE Boost::headers)

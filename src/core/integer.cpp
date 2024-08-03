@@ -145,6 +145,36 @@ public:
     return mpz_cmp_si(value_, rhs) < 0;
   }
 
+  bool operator<=(unsigned long const rhs) const
+  {
+    return mpz_cmp_ui(value_, rhs) <= 0;
+  }
+
+  bool operator<=(long const rhs) const
+  {
+    return mpz_cmp_si(value_, rhs) <= 0;
+  }
+
+  bool operator>(unsigned long const rhs) const
+  {
+    return mpz_cmp_ui(value_, rhs) > 0;
+  }
+
+  bool operator>(long const rhs) const
+  {
+    return mpz_cmp_si(value_, rhs) > 0;
+  }
+
+  bool operator>=(unsigned long const rhs) const
+  {
+    return mpz_cmp_ui(value_, rhs) >= 0;
+  }
+
+  bool operator>=(long const rhs) const
+  {
+    return mpz_cmp_si(value_, rhs) >= 0;
+  }
+
   ~Impl_()
   {
     mpz_clear(value_);
@@ -561,12 +591,18 @@ bool Integer::operator<=(Integer const &rhs) const
 
 bool Integer::operator<=(unsigned long const rhs) const
 {
-  return !(rhs < *this);
+  if (!p_impl_) {
+    IS_MAJSOUL_FAIR_THROW<std::invalid_argument>("`p_impl_` is `nullptr`.");
+  }
+  return *p_impl_ <= rhs;
 }
 
 bool Integer::operator<=(long const rhs) const
 {
-  return !(rhs < *this);
+  if (!p_impl_) {
+    IS_MAJSOUL_FAIR_THROW<std::invalid_argument>("`p_impl_` is `nullptr`.");
+  }  
+  return *p_impl_ <= rhs;
 }
 
 bool Integer::operator>(Integer const &rhs) const
@@ -576,12 +612,18 @@ bool Integer::operator>(Integer const &rhs) const
 
 bool Integer::operator>(unsigned long const rhs) const
 {
-  return rhs < *this;
+  if (!p_impl_) {
+    IS_MAJSOUL_FAIR_THROW<std::invalid_argument>("`p_impl_` is `nullptr`.");
+  }
+  return *p_impl_ > rhs;
 }
 
 bool Integer::operator>(long const rhs) const
 {
-  return rhs < *this;
+  if (!p_impl_) {
+    IS_MAJSOUL_FAIR_THROW<std::invalid_argument>("`p_impl_` is `nullptr`.");
+  }  
+  return *p_impl_ > rhs;
 }
 
 bool Integer::operator>=(Integer const &rhs) const
@@ -591,12 +633,18 @@ bool Integer::operator>=(Integer const &rhs) const
 
 bool Integer::operator>=(unsigned long const rhs) const
 {
-  return !(*this < rhs);
+  if (!p_impl_) {
+    IS_MAJSOUL_FAIR_THROW<std::invalid_argument>("`p_impl_` is `nullptr`.");
+  }
+  return *p_impl_ >= rhs;
 }
 
 bool Integer::operator>=(long const rhs) const
 {
-  return !(*this < rhs);
+  if (!p_impl_) {
+    IS_MAJSOUL_FAIR_THROW<std::invalid_argument>("`p_impl_` is `nullptr`.");
+  }
+  return *p_impl_ >= rhs;
 }
 
 void swap(Integer &lhs, Integer &rhs) noexcept
@@ -612,6 +660,36 @@ void swap(Integer &lhs, Integer &&rhs) noexcept
 void swap(Integer &&lhs, Integer &rhs) noexcept
 {
   lhs.swap(rhs);
+}
+
+Integer operator+(unsigned long const lhs, Integer const &rhs)
+{
+  return rhs + lhs;
+}
+
+Integer operator-(unsigned long const lhs, Integer const &rhs)
+{
+  return Integer(lhs) - rhs;
+}
+
+Integer operator*(unsigned long const lhs, Integer const &rhs)
+{
+  return rhs * lhs;
+}
+
+Integer operator*(long const lhs, Integer const &rhs)
+{
+  return rhs * lhs;
+}
+
+Integer operator/(unsigned long const lhs, Integer const &rhs)
+{
+  return Integer(lhs) / rhs;
+}
+
+Integer operator%(unsigned long const lhs, Integer const &rhs)
+{
+  return Integer(lhs) % rhs;
 }
 
 bool operator==(unsigned long const lhs, Integer const &rhs)
@@ -672,6 +750,32 @@ bool operator>=(unsigned long const lhs, Integer const &rhs)
 bool operator>=(long const lhs, Integer const &rhs)
 {
   return rhs <= lhs;
+}
+
+IntegerRandomState::IntegerRandomState()
+  : p_impl_(std::make_shared<Impl_>())
+{}
+
+IntegerRandomState::IntegerRandomState(IntegerRandomState &&other) noexcept
+  : p_impl_(std::move(other.p_impl_))
+{
+  other.p_impl_ = nullptr;
+}
+
+void IntegerRandomState::swap(IntegerRandomState &other) noexcept
+{
+  p_impl_.swap(other.p_impl_);
+}
+
+void IntegerRandomState::swap(IntegerRandomState &&other) noexcept
+{
+  p_impl_.swap(other.p_impl_);
+}
+
+IntegerRandomState &IntegerRandomState::operator=(IntegerRandomState &&other) noexcept
+{
+  IntegerRandomState(std::move(other)).swap(*this);
+  return *this;
 }
 
 void swap(IntegerRandomState &lhs, IntegerRandomState &rhs) noexcept

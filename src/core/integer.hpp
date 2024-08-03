@@ -144,6 +144,18 @@ void swap(Integer &lhs, Integer &&rhs) noexcept;
 
 void swap(Integer &&lhs, Integer &rhs) noexcept;
 
+Integer operator+(unsigned long lhs, Integer const &rhs);
+
+Integer operator-(unsigned long lhs, Integer const &rhs);
+
+Integer operator*(unsigned long lhs, Integer const &rhs);
+
+Integer operator*(long lhs, Integer const &rhs);
+
+Integer operator/(unsigned long lhs, Integer const &rhs);
+
+Integer operator%(unsigned long lhs, Integer const &rhs);
+
 bool operator==(unsigned long lhs, Integer const &rhs);
 
 bool operator==(long lhs, Integer const &rhs);
