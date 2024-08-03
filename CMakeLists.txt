@@ -1,6 +1,6 @@
 # Copyright (c) 2024 Cryolite
 # SPDX-License-Identifier: MIT
-# This file is part of https://github.com/Cryolite/tsumonya
+# This file is part of https://github.com/Cryolite/is-majsoul-fair.
 
 cmake_minimum_required(VERSION 3.25.0)
 project(is-majsoul-fair)
