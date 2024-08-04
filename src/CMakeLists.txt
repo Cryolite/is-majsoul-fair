@@ -18,6 +18,8 @@ target_link_libraries(common
 
 add_library(core
   core/interval_to_binary.cpp
+  core/interval_to_entropy.cpp
+  core/covering_binary_interval.cpp
   core/permutation_to_interval.cpp
   core/interval.cpp
   core/integer.cpp)
@@ -28,6 +30,13 @@ target_link_libraries(core
 add_executable(paishan
   paishan.cpp)
 target_link_libraries(paishan
+  PRIVATE common
+  PRIVATE Boost::headers)
+
+add_executable(paishan_to_entropy
+  paishan_to_entropy.cpp)
+target_link_libraries(paishan_to_entropy
+  PRIVATE core
   PRIVATE common
   PRIVATE Boost::headers)
 
