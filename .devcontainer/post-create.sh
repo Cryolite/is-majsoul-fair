@@ -14,6 +14,7 @@ fi
 GMP_URL='https://ftp.gnu.org/gnu/gmp/gmp-6.3.0.tar.xz'
 ABSEIL_CPP_URL="https://github.com/abseil/abseil-cpp/releases/download/20240116.2/abseil-cpp-20240116.2.tar.gz"
 PROTOBUF_URL="https://github.com/protocolbuffers/protobuf/releases/download/v27.2/protobuf-27.2.tar.gz"
+NIST_STASTICAL_TEST_SUITE_URL="https://csrc.nist.gov/CSRC/media/Projects/Random-Bit-Generation/documents/sts-2_1_2.zip"
 
 # Install prerequisite packages.
 sudo apt-get -y update
@@ -116,6 +117,22 @@ popd
   toolset=gcc variant=release threading=multi link=shared runtime-link=shared \
   boost.stacktrace.from_exception=off
 rm -rf /workspaces/boost
+
+# Install NIST Statistical Test Suite.
+pushd /workspaces
+NIST_STASTICAL_TEST_SUITE_ZIP_NAME="$(basename "$NIST_STASTICAL_TEST_SUITE_URL")"
+curl -fLsSo "$NIST_STASTICAL_TEST_SUITE_ZIP_NAME" "$NIST_STASTICAL_TEST_SUITE_URL"
+unzip "$NIST_STASTICAL_TEST_SUITE_ZIP_NAME"
+rm -f "$NIST_STASTICAL_TEST_SUITE_ZIP_NAME"
+NIST_STASTICAL_TEST_SUITE_DIR_NAME="$(basename "$NIST_STASTICAL_TEST_SUITE_ZIP_NAME" .zip | tr '_' '.')"
+mv "$NIST_STASTICAL_TEST_SUITE_DIR_NAME" "$NIST_STASTICAL_TEST_SUITE_DIR_NAME.tmp"
+mv "$NIST_STASTICAL_TEST_SUITE_DIR_NAME.tmp/$NIST_STASTICAL_TEST_SUITE_DIR_NAME" .
+rmdir "$NIST_STASTICAL_TEST_SUITE_DIR_NAME.tmp"
+NIST_STASTICAL_TEST_SUITE_ROOT="$(readlink -e "$NIST_STASTICAL_TEST_SUITE_DIR_NAME")"
+pushd "$NIST_STASTICAL_TEST_SUITE_ROOT"
+make -f makefile
+popd
+popd
 
 pushd /workspaces/is-majsoul-fair/src/common
 protoc --cpp_out=. mahjongsoul.proto
