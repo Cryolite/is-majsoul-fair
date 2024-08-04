@@ -7,6 +7,7 @@
 #include "../common/throw.hpp"
 #include <stdexcept>
 #include <gmp.h>
+#include <cmath>
 
 
 namespace IsMajsoulFair{
@@ -113,6 +114,18 @@ public:
   explicit operator unsigned long() const
   {
     return mpz_get_ui(value_);
+  }
+
+  double divideAsDouble(Impl_ const &denominator) const
+  {
+    long int exp = 0;
+    double const mantissa = mpz_get_d_2exp(&exp, value_);
+  
+    long int denominator_exp = 0;
+    double const denominator_mantissa = mpz_get_d_2exp(&denominator_exp, denominator.value_);
+  
+    exp -= denominator_exp;
+    return mantissa / denominator_mantissa * std::pow(2.0, exp);
   }
 
   bool operator==(Impl_ const &rhs) const
@@ -486,6 +499,24 @@ Integer Integer::pow(unsigned long const exponent) const
   return Integer(*this).inplacePow(exponent);
 }
 
+Integer &Integer::setToRandom(IntegerRandomState &state, Integer const &upper)
+{
+  if (!p_impl_) {
+    IS_MAJSOUL_FAIR_THROW<std::invalid_argument>("`p_impl_` is `nullptr`.");
+  }
+  if (!state.p_impl_) {
+    IS_MAJSOUL_FAIR_THROW<std::invalid_argument>("`state.p_impl_` is `nullptr`.");
+  }
+  if (!upper.p_impl_) {
+    IS_MAJSOUL_FAIR_THROW<std::invalid_argument>("`upper.p_impl_` is `nullptr`.");
+  }
+  if (upper < 0ul) {
+    IS_MAJSOUL_FAIR_THROW<std::invalid_argument>("`upper` must be non-negative.");
+  }
+  p_impl_->setToRandom(state.p_impl_->get(), *upper.p_impl_);
+  return *this;
+}
+
 Integer &Integer::setToRandom(
   IntegerRandomState &state, Integer const &lower, Integer const &upper)
 {
@@ -495,10 +526,17 @@ Integer &Integer::setToRandom(
   if (!state.p_impl_) {
     IS_MAJSOUL_FAIR_THROW<std::invalid_argument>("`state.p_impl_` is `nullptr`.");
   }
+  if (!lower.p_impl_) {
+    IS_MAJSOUL_FAIR_THROW<std::invalid_argument>("`lower.p_impl_` is `nullptr`.");
+  }
+  if (!upper.p_impl_) {
+    IS_MAJSOUL_FAIR_THROW<std::invalid_argument>("`upper.p_impl_` is `nullptr`.");
+  }
+  if (lower >= upper) {
+    IS_MAJSOUL_FAIR_THROW<std::invalid_argument>("`lower` must be less than `upper`.");
+  }
   Integer const range = upper - lower;
-  p_impl_->setToRandom(state.p_impl_->get(), *range.p_impl_);
-
-  return *this += lower;
+  return setToRandom(state, range) += lower;
 }
 
 Integer::operator unsigned long() const
@@ -690,6 +728,20 @@ Integer operator/(unsigned long const lhs, Integer const &rhs)
 Integer operator%(unsigned long const lhs, Integer const &rhs)
 {
   return Integer(lhs) % rhs;
+}
+
+double divideAsDouble(Integer const &numerator, Integer const &denominator)
+{
+  if (!numerator.p_impl_) {
+    IS_MAJSOUL_FAIR_THROW<std::invalid_argument>("`numerator.p_impl_` is `nullptr`.");
+  }
+  if (!denominator.p_impl_) {
+    IS_MAJSOUL_FAIR_THROW<std::invalid_argument>("`denominator.p_impl_` is `nullptr`.");
+  }
+  if (denominator == 0ul) {
+    IS_MAJSOUL_FAIR_THROW<std::invalid_argument>("`denominator` is zero.");
+  }
+  return numerator.p_impl_->divideAsDouble(*denominator.p_impl_);
 }
 
 bool operator==(unsigned long const lhs, Integer const &rhs)

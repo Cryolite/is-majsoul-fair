@@ -12,6 +12,10 @@ namespace IsMajsoulFair{
 
 class IntegerRandomState;
 
+class Integer;
+
+double divideAsDouble(Integer const &numerator, Integer const &denominator);
+
 class Integer
 {
 public:
@@ -93,9 +97,13 @@ public:
 
   Integer pow(unsigned long exponent) const;
 
+  Integer &setToRandom(IntegerRandomState &state, Integer const &upper);
+
   Integer &setToRandom(IntegerRandomState &state, Integer const &lower, Integer const &upper);
 
   explicit operator unsigned long() const;
+
+  friend double IsMajsoulFair::divideAsDouble(Integer const &numerator, Integer const &denominator);
 
   bool operator==(Integer const &rhs) const;
 
