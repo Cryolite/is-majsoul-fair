@@ -22,10 +22,13 @@ namespace{
 
 using std::placeholders::_1;
 
-void paishanToBinary(std::vector<unsigned char> const &paishan, IsMajsoulFair::IntegerRandomState &state)
+void paishanToBinary(
+  std::vector<unsigned char> const &paishan,
+  std::size_t const num_bits,
+  IsMajsoulFair::IntegerRandomState &state)
 {
   IsMajsoulFair::Interval const interval = IsMajsoulFair::permutationToInterval(paishan);
-  std::vector<unsigned char> const binary = IsMajsoulFair::intervalToBinary(interval, 83u, state);
+  std::vector<unsigned char> const binary = IsMajsoulFair::intervalToBinary(interval, num_bits, state);
   for (unsigned char bit : binary) {
     std::cout << static_cast<unsigned>(bit);
   }
@@ -35,7 +38,7 @@ void paishanToBinary(std::vector<unsigned char> const &paishan, IsMajsoulFair::I
 
 int main(int const argc, char const * const * const argv)
 {
-  if (argc != 2) {
+  if (argc != 3) {
     IS_MAJSOUL_FAIR_THROW<std::invalid_argument>("The number of arguments is invalid.");
   }
 
@@ -46,6 +49,8 @@ int main(int const argc, char const * const * const argv)
   if (!ifs) {
     IS_MAJSOUL_FAIR_THROW<std::runtime_error>(_1) << path.string() << ": Failed to open.";
   }
+
+  std::size_t const num_bits = boost::lexical_cast<std::size_t>(argv[2]);
 
   while (true) {
     std::string line;
@@ -68,7 +73,7 @@ int main(int const argc, char const * const * const argv)
         IS_MAJSOUL_FAIR_THROW<std::invalid_argument>(_1) << paishan.size();
       }
 
-      paishanToBinary(paishan, state);
+      paishanToBinary(paishan, num_bits, state);
       continue;
     }
 
