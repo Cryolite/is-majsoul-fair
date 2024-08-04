@@ -4,6 +4,9 @@
 
 #include "interval_to_binary.hpp"
 
+#include "covering_binary_interval.hpp"
+#include "interval.hpp"
+#include "integer.hpp"
 #include "../common/throw.hpp"
 #include <random>
 #include <vector>
@@ -16,52 +19,6 @@
 namespace IsMajsoulFair{
 
 namespace{
-
-std::pair<IsMajsoulFair::Integer, IsMajsoulFair::Integer> getCoveringBinaryInterval(
-  IsMajsoulFair::Interval const &interval, std::size_t const num_bits)
-{
-  IsMajsoulFair::Integer const binary_denominator = [&]() {
-    IsMajsoulFair::Integer term(2ul);
-    return term.inplacePow(num_bits);
-  }();
-
-  IsMajsoulFair::Integer const original_lower_numerator = interval.getLowerNumerator() * binary_denominator;
-  IsMajsoulFair::Integer binary_lower_numerator(0ul);
-  IsMajsoulFair::Integer binary_lower_numerator_term = interval.getDenominator() * binary_denominator;
-  for (std::size_t i = 0u; i < num_bits; ++i) {
-    binary_lower_numerator_term /= 2ul;
-    if (binary_lower_numerator + binary_lower_numerator_term <= original_lower_numerator) {
-      binary_lower_numerator += binary_lower_numerator_term;
-    }
-  }
-  if (binary_lower_numerator <= original_lower_numerator && original_lower_numerator < binary_lower_numerator + interval.getDenominator()) {
-    // OK
-  }
-  else {
-    IS_MAJSOUL_FAIR_THROW<std::logic_error>("A logic error.");
-  }
-
-  IsMajsoulFair::Integer const original_upper_numerator = interval.getUpperNumerator() * binary_denominator;
-  IsMajsoulFair::Integer binary_upper_numerator = interval.getDenominator() * binary_denominator;
-  IsMajsoulFair::Integer binary_upper_numerator_term = interval.getDenominator() * binary_denominator;
-  for (std::size_t i = 0u; i < num_bits; ++i) {
-    binary_upper_numerator_term /= 2ul;
-    if (binary_upper_numerator - binary_upper_numerator_term >= original_upper_numerator) {
-      binary_upper_numerator -= binary_upper_numerator_term;
-    }
-  }
-  if (binary_upper_numerator < original_upper_numerator + interval.getDenominator() && original_upper_numerator <= binary_upper_numerator) {
-    // OK
-  }
-  else {
-    if (binary_upper_numerator - interval.getDenominator() >= original_upper_numerator) {
-      IS_MAJSOUL_FAIR_THROW<std::logic_error>("A logic error.");
-    }
-    IS_MAJSOUL_FAIR_THROW<std::logic_error>("A logic error.");
-  }
-
-  return {binary_lower_numerator / interval.getDenominator(), binary_upper_numerator / interval.getDenominator()};
-}
 
 std::vector<unsigned char> integerToBinary(IsMajsoulFair::Integer const &integer, std::size_t const num_bits)
 {
@@ -82,7 +39,7 @@ std::vector<unsigned char> integerToBinary(IsMajsoulFair::Integer const &integer
 std::vector<unsigned char> intervalToBinary(
   Interval const &interval, std::size_t const num_bits, IsMajsoulFair::IntegerRandomState &state)
 {
-  auto const [lower_binary, upper_binary] = getCoveringBinaryInterval(interval, num_bits);
+  auto const [lower_binary, upper_binary] = IsMajsoulFair::getCoveringBinaryInterval(interval, num_bits);
   if (upper_binary - lower_binary > IsMajsoulFair::Integer(SIZE_MAX)) {
     IS_MAJSOUL_FAIR_THROW<std::invalid_argument>("`num_bits` is too large.");
   }
@@ -99,6 +56,9 @@ std::vector<unsigned char> intervalToBinary(
   {
     IsMajsoulFair::Integer probability_mass
       = (lower_binary + 1ul) * interval.getDenominator() - interval.getLowerNumerator() * binary_denominator;
+    if (probability_mass < 0l) {
+      IS_MAJSOUL_FAIR_THROW<std::logic_error>("A logic error.");
+    }
     probability_masses.push_back(std::move(probability_mass));
   }
   for (IsMajsoulFair::Integer i = lower_binary + 1ul; i + 1ul < upper_binary; ++i) {
@@ -108,15 +68,19 @@ std::vector<unsigned char> intervalToBinary(
   {
     IsMajsoulFair::Integer probability_mass
       = interval.getUpperNumerator() * binary_denominator - (upper_binary - 1ul) * interval.getDenominator();
+    if (probability_mass < 0l) {
+      IS_MAJSOUL_FAIR_THROW<std::logic_error>("A logic error.");
+    }
     probability_masses.push_back(std::move(probability_mass));
+  }
+  if (probability_masses.size() != upper_binary - lower_binary) {
+    IS_MAJSOUL_FAIR_THROW<std::logic_error>("A logic error.");
   }
 
   IsMajsoulFair::Integer result_as_integer = [&]() {
-    Integer random_value;
+    IsMajsoulFair::Integer random_value;
     random_value.setToRandom(
-      state,
-      interval.getLowerNumerator() * binary_denominator,
-      interval.getUpperNumerator() * binary_denominator);
+      state, (interval.getUpperNumerator() - interval.getLowerNumerator()) * binary_denominator);
     for (unsigned long i = 0u; i < probability_masses.size(); ++i) {
       if (random_value < probability_masses[i]) {
         return lower_binary + i;
