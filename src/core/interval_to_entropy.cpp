@@ -1,3 +1,7 @@
+// Copyright (c) 2024 Cryolite
+// SPDX-License-Identifier: MIT
+// This file is part of https://github.com/Cryolite/is-majsoul-fair.
+
 #include "interval_to_entropy.hpp"
 
 #include "covering_binary_interval.hpp"
