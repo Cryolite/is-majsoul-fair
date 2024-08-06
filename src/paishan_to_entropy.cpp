@@ -15,6 +15,8 @@
 #include <string_view>
 #include <string>
 #include <functional>
+#include <stdexcept>
+#include <cstdint>
 #include <cstdlib>
 
 
@@ -22,7 +24,7 @@ namespace{
 
 using std::placeholders::_1;
 
-double paishanToEntropy(std::vector<unsigned char> const &paishan, std::size_t const num_bits)
+double paishanToEntropy(std::vector<std::uint_fast8_t> const &paishan, std::size_t const num_bits)
 {
   IsMajsoulFair::Interval const interval = IsMajsoulFair::permutationToInterval(paishan);
   return IsMajsoulFair::intervalToEntropy(interval, num_bits);
@@ -54,12 +56,12 @@ int main(int const argc, char const * const * const argv)
     }
 
     if (!line.empty()) {
-      std::vector<unsigned char> paishan;
+      std::vector<std::uint_fast8_t> paishan;
       for (auto e : line | std::ranges::views::split(',')) {
         std::string_view sv{e.cbegin(), e.cend()};
-        unsigned long const tile = boost::lexical_cast<unsigned long>(sv);
+        unsigned const tile = boost::lexical_cast<unsigned>(sv);
         if (tile >= 37u) {
-          IS_MAJSOUL_FAIR_THROW<std::invalid_argument>(_1) << static_cast<unsigned>(tile);
+          IS_MAJSOUL_FAIR_THROW<std::invalid_argument>(_1) << tile;
         }
         paishan.push_back(tile);
       }
