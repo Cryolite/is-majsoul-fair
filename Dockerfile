@@ -139,7 +139,7 @@ RUN set -euxo pipefail; \
     rmdir "$NIST_STASTICAL_TEST_SUITE_DIR_NAME.tmp"; \
     NIST_STASTICAL_TEST_SUITE_ROOT="$(readlink -e "$NIST_STASTICAL_TEST_SUITE_DIR_NAME")"; \
     pushd "$NIST_STASTICAL_TEST_SUITE_ROOT"; \
-    make -f makefile; \
+    make -f makefile 'GCCFLAGS=-c -Wall -O3'; \
     popd; \
     popd
 
