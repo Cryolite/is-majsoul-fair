@@ -9,6 +9,7 @@
 #include "integer.hpp"
 #include "../common/throw.hpp"
 #include <random>
+#include <algorithm>
 #include <vector>
 #include <utility>
 #include <stdexcept>
@@ -31,6 +32,7 @@ std::vector<unsigned char> integerToBinary(IsMajsoulFair::Integer const &integer
       result.push_back(bit);
     }
   }
+  std::reverse(result.begin(), result.end());
   return result;
 }
 
