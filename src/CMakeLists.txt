@@ -27,6 +27,11 @@ target_link_libraries(core
   PRIVATE common
   PRIVATE gmp)
 
+add_executable(unbiased_paishan
+  unbiased_paishan.cpp)
+target_link_libraries(unbiased_paishan
+  PRIVATE Boost::headers)
+
 add_executable(paishan
   paishan.cpp)
 target_link_libraries(paishan
