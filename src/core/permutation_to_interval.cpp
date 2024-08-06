@@ -7,13 +7,21 @@
 #include "interval.hpp"
 #include "integer.hpp"
 #include "../common/throw.hpp"
+#include <sstream>
 #include <numeric>
 #include <vector>
 #include <array>
+#include <functional>
 #include <cstdint>
 
 
 namespace IsMajsoulFair{
+
+namespace{
+
+using std::placeholders::_1;
+
+} // namespace <unnamed>
 
 Interval permutationToInterval(std::vector<std::uint_fast8_t> const &permutation)
 {
@@ -36,9 +44,20 @@ Interval permutationToInterval(std::vector<std::uint_fast8_t> const &permutation
         IS_MAJSOUL_FAIR_THROW<std::invalid_argument>("An invalid `permutation` was passed.");
       }
       if (num_tiles[tile] == 0u) {
-        IS_MAJSOUL_FAIR_THROW<std::invalid_argument>("An invalid `permutation` was passed.");
+        std::ostringstream oss;
+        {
+          bool is_first = true;
+          for (std::uint_fast8_t t : permutation) {
+            if (!is_first) {
+              oss << ", ";
+            }
+            oss << static_cast<unsigned>(t);
+            is_first = false;
+          }
+        }
+        IS_MAJSOUL_FAIR_THROW<std::invalid_argument>(_1) << "An invalid `permutation` was passed: " << oss.str();
       }
-      unsigned long offset = std::accumulate(num_tiles.begin(), num_tiles.begin() + tile, 0u);
+      unsigned long offset = std::accumulate(num_tiles.begin(), num_tiles.begin() + tile, 0ul);
 
       IsMajsoulFair::Integer difference = upper_numerator - lower_numerator;
       lower_numerator = lower_numerator * denominator_factor + difference * offset;
