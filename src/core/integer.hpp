@@ -103,6 +103,8 @@ public:
 
   explicit operator unsigned long() const;
 
+  explicit operator long() const;
+
   friend double IsMajsoulFair::divideAsDouble(Integer const &numerator, Integer const &denominator);
 
   bool operator==(Integer const &rhs) const;

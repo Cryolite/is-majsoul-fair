@@ -35,70 +35,70 @@ public:
     mpz_init_set(value_, other.value_);
   }
 
-  Impl_ &operator+=(Impl_ const &rhs)
+  Impl_(Impl_ &&) = delete;
+
+  ~Impl_()
+  {
+    mpz_clear(value_);
+  }
+
+  Impl_ &operator=(Impl_ const &) = delete;
+
+  Impl_ &operator=(Impl_ &&) = delete;
+
+  void operator+=(Impl_ const &rhs)
   {
     mpz_add(value_, value_, rhs.value_);
-    return *this;
   }
 
-  Impl_ &operator+=(unsigned long const rhs)
+  void operator+=(unsigned long const rhs)
   {
     mpz_add_ui(value_, value_, rhs);
-    return *this;
   }
 
-  Impl_ &operator-=(Impl_ const &rhs)
+  void operator-=(Impl_ const &rhs)
   {
     mpz_sub(value_, value_, rhs.value_);
-    return *this;
   }
 
-  Impl_ &operator-=(unsigned long const rhs)
+  void operator-=(unsigned long const rhs)
   {
     mpz_sub_ui(value_, value_, rhs);
-    return *this;
   }
 
-  Impl_ &operator*=(Impl_ const &rhs)
+  void operator*=(Impl_ const &rhs)
   {
     mpz_mul(value_, value_, rhs.value_);
-    return *this;
   }
 
-  Impl_ &operator*=(unsigned long const rhs)
+  void operator*=(unsigned long const rhs)
   {
     mpz_mul_ui(value_, value_, rhs);
-    return *this;
   }
 
-  Impl_ &operator*=(long const rhs)
+  void operator*=(long const rhs)
   {
     mpz_mul_si(value_, value_, rhs);
-    return *this;
   }
 
-  Impl_ &operator/=(Impl_ const &rhs)
+  void operator/=(Impl_ const &rhs)
   {
     mpz_tdiv_q(value_, value_, rhs.value_);
-    return *this;
   }
 
-  Impl_ &operator/=(unsigned long const rhs)
+  void operator/=(unsigned long const rhs)
   {
     mpz_tdiv_q_ui(value_, value_, rhs);
-    return *this;
   }
 
-  Impl_ &operator%=(Impl_ const &rhs)
+  void operator%=(Impl_ const &rhs)
   {
     mpz_tdiv_r(value_, value_, rhs.value_);
-    return *this;
   }
 
-  Impl_ &operator%=(unsigned long const rhs)
+  void operator%=(unsigned long const rhs)
   {
     mpz_tdiv_r_ui(value_, value_, rhs);
-    return *this;
   }
 
   void inplacePow(unsigned long const exponent)
@@ -116,6 +116,11 @@ public:
     return mpz_get_ui(value_);
   }
 
+  explicit operator long() const
+  {
+    return mpz_get_si(value_);
+  }
+
   double divideAsDouble(Impl_ const &denominator) const
   {
     long int exp = 0;
@@ -125,7 +130,7 @@ public:
     double const denominator_mantissa = mpz_get_d_2exp(&denominator_exp, denominator.value_);
   
     exp -= denominator_exp;
-    return mantissa / denominator_mantissa * std::pow(2.0, exp);
+    return (mantissa / denominator_mantissa) * std::pow(2.0, exp);
   }
 
   bool operator==(Impl_ const &rhs) const
@@ -186,11 +191,6 @@ public:
   bool operator>=(long const rhs) const
   {
     return mpz_cmp_si(value_, rhs) >= 0;
-  }
-
-  ~Impl_()
-  {
-    mpz_clear(value_);
   }
 
 private:
@@ -286,7 +286,7 @@ Integer &Integer::operator=(long const value)
 Integer &Integer::operator++()
 {
   if (!p_impl_) {
-    IS_MAJSOUL_FAIR_THROW<std::invalid_argument>("`p_impl_` is `nullptr`.");
+    IS_MAJSOUL_FAIR_THROW<std::invalid_argument>("`*this` is stale.");
   }
   return *this += 1ul;
 }
@@ -301,7 +301,7 @@ Integer Integer::operator++(int)
 Integer &Integer::operator--()
 {
   if (!p_impl_) {
-    IS_MAJSOUL_FAIR_THROW<std::invalid_argument>("`p_impl_` is `nullptr`.");
+    IS_MAJSOUL_FAIR_THROW<std::invalid_argument>("`*this` is stale.");
   }
   return *this -= 1ul;
 }
@@ -316,10 +316,10 @@ Integer Integer::operator--(int)
 Integer &Integer::operator+=(Integer const &rhs)
 {
   if (!p_impl_) {
-    IS_MAJSOUL_FAIR_THROW<std::invalid_argument>("`p_impl_` is `nullptr`.");
+    IS_MAJSOUL_FAIR_THROW<std::invalid_argument>("`*this` is stale.");
   }
   if (!rhs.p_impl_) {
-    IS_MAJSOUL_FAIR_THROW<std::invalid_argument>("`rhs.p_impl_` is `nullptr`.");
+    IS_MAJSOUL_FAIR_THROW<std::invalid_argument>("`rhs` is stale.");
   }
   *p_impl_ += *rhs.p_impl_;
   return *this;
@@ -328,7 +328,7 @@ Integer &Integer::operator+=(Integer const &rhs)
 Integer &Integer::operator+=(unsigned long const rhs)
 {
   if (!p_impl_) {
-    IS_MAJSOUL_FAIR_THROW<std::invalid_argument>("`p_impl_` is `nullptr`.");
+    IS_MAJSOUL_FAIR_THROW<std::invalid_argument>("`*this` is stale.");
   }
   *p_impl_ += rhs;
   return *this;
@@ -347,10 +347,10 @@ Integer Integer::operator+(unsigned long const rhs) const
 Integer &Integer::operator-=(Integer const &rhs)
 {
   if (!p_impl_) {
-    IS_MAJSOUL_FAIR_THROW<std::invalid_argument>("`p_impl_` is `nullptr`.");
+    IS_MAJSOUL_FAIR_THROW<std::invalid_argument>("`*this` is stale.");
   }
   if (!rhs.p_impl_) {
-    IS_MAJSOUL_FAIR_THROW<std::invalid_argument>("`rhs.p_impl_` is `nullptr`.");
+    IS_MAJSOUL_FAIR_THROW<std::invalid_argument>("`rhs` is stale.");
   }
   *p_impl_ -= *rhs.p_impl_;
   return *this;
@@ -359,7 +359,7 @@ Integer &Integer::operator-=(Integer const &rhs)
 Integer &Integer::operator-=(unsigned long const rhs)
 {
   if (!p_impl_) {
-    IS_MAJSOUL_FAIR_THROW<std::invalid_argument>("`p_impl_` is `nullptr`.");
+    IS_MAJSOUL_FAIR_THROW<std::invalid_argument>("`*this` is stale.");
   }
   *p_impl_ -= rhs;
   return *this;
@@ -378,10 +378,10 @@ Integer Integer::operator-(unsigned long const rhs) const
 Integer &Integer::operator*=(Integer const &rhs)
 {
   if (!p_impl_) {
-    IS_MAJSOUL_FAIR_THROW<std::invalid_argument>("`p_impl_` is `nullptr`.");
+    IS_MAJSOUL_FAIR_THROW<std::invalid_argument>("`*this` is stale.");
   }
   if (!rhs.p_impl_) {
-    IS_MAJSOUL_FAIR_THROW<std::invalid_argument>("`rhs.p_impl_` is `nullptr`.");
+    IS_MAJSOUL_FAIR_THROW<std::invalid_argument>("`rhs` is stale.");
   }
   *p_impl_ *= *rhs.p_impl_;
   return *this;
@@ -390,7 +390,7 @@ Integer &Integer::operator*=(Integer const &rhs)
 Integer &Integer::operator*=(unsigned long const rhs)
 {
   if (!p_impl_) {
-    IS_MAJSOUL_FAIR_THROW<std::invalid_argument>("`p_impl_` is `nullptr`.");
+    IS_MAJSOUL_FAIR_THROW<std::invalid_argument>("`*this` is stale.");
   }
   *p_impl_ *= rhs;
   return *this;
@@ -399,7 +399,7 @@ Integer &Integer::operator*=(unsigned long const rhs)
 Integer &Integer::operator*=(long const rhs)
 {
   if (!p_impl_) {
-    IS_MAJSOUL_FAIR_THROW<std::invalid_argument>("`p_impl_` is `nullptr`.");
+    IS_MAJSOUL_FAIR_THROW<std::invalid_argument>("`*this` is stale.");
   }
   *p_impl_ *= rhs;
   return *this;
@@ -423,10 +423,10 @@ Integer Integer::operator*(long const rhs) const
 Integer &Integer::operator/=(Integer const &rhs)
 {
   if (!p_impl_) {
-    IS_MAJSOUL_FAIR_THROW<std::invalid_argument>("`p_impl_` is `nullptr`.");
+    IS_MAJSOUL_FAIR_THROW<std::invalid_argument>("`*this` is stale.");
   }
   if (!rhs.p_impl_) {
-    IS_MAJSOUL_FAIR_THROW<std::invalid_argument>("`rhs.p_impl_` is `nullptr`.");
+    IS_MAJSOUL_FAIR_THROW<std::invalid_argument>("`rhs` is stale.");
   }
   *p_impl_ /= *rhs.p_impl_;
   return *this;
@@ -435,7 +435,7 @@ Integer &Integer::operator/=(Integer const &rhs)
 Integer &Integer::operator/=(unsigned long const rhs)
 {
   if (!p_impl_) {
-    IS_MAJSOUL_FAIR_THROW<std::invalid_argument>("`p_impl_` is `nullptr`.");
+    IS_MAJSOUL_FAIR_THROW<std::invalid_argument>("`*this` is stale.");
   }
   *p_impl_ /= rhs;
   return *this;
@@ -454,10 +454,10 @@ Integer Integer::operator/(unsigned long const rhs) const
 Integer &Integer::operator%=(Integer const &rhs)
 {
   if (!p_impl_) {
-    IS_MAJSOUL_FAIR_THROW<std::invalid_argument>("`p_impl_` is `nullptr`.");
+    IS_MAJSOUL_FAIR_THROW<std::invalid_argument>("`*this` is stale.");
   }
   if (!rhs.p_impl_) {
-    IS_MAJSOUL_FAIR_THROW<std::invalid_argument>("`rhs.p_impl_` is `nullptr`.");
+    IS_MAJSOUL_FAIR_THROW<std::invalid_argument>("`rhs` is stale.");
   }
   *p_impl_ %= *rhs.p_impl_;
   return *this;
@@ -466,7 +466,7 @@ Integer &Integer::operator%=(Integer const &rhs)
 Integer &Integer::operator%=(unsigned long const rhs)
 {
   if (!p_impl_) {
-    IS_MAJSOUL_FAIR_THROW<std::invalid_argument>("`p_impl_` is `nullptr`.");
+    IS_MAJSOUL_FAIR_THROW<std::invalid_argument>("`*this` is stale.");
   }
   *p_impl_ %= rhs;
   return *this;
@@ -485,7 +485,7 @@ Integer Integer::operator%(unsigned long const rhs) const
 Integer &Integer::inplacePow(unsigned long const exponent)
 {
   if (!p_impl_) {
-    IS_MAJSOUL_FAIR_THROW<std::invalid_argument>("`p_impl_` is `nullptr`.");
+    IS_MAJSOUL_FAIR_THROW<std::invalid_argument>("`*this` is stale.");
   }
   p_impl_->inplacePow(exponent);
   return *this;
@@ -493,25 +493,22 @@ Integer &Integer::inplacePow(unsigned long const exponent)
 
 Integer Integer::pow(unsigned long const exponent) const
 {
-  if (!p_impl_) {
-    IS_MAJSOUL_FAIR_THROW<std::invalid_argument>("`p_impl_` is `nullptr`.");
-  }
   return Integer(*this).inplacePow(exponent);
 }
 
 Integer &Integer::setToRandom(IntegerRandomState &state, Integer const &upper)
 {
   if (!p_impl_) {
-    IS_MAJSOUL_FAIR_THROW<std::invalid_argument>("`p_impl_` is `nullptr`.");
+    IS_MAJSOUL_FAIR_THROW<std::invalid_argument>("`*this` is stale.");
   }
   if (!state.p_impl_) {
-    IS_MAJSOUL_FAIR_THROW<std::invalid_argument>("`state.p_impl_` is `nullptr`.");
+    IS_MAJSOUL_FAIR_THROW<std::invalid_argument>("`state` is stale.");
   }
   if (!upper.p_impl_) {
-    IS_MAJSOUL_FAIR_THROW<std::invalid_argument>("`upper.p_impl_` is `nullptr`.");
+    IS_MAJSOUL_FAIR_THROW<std::invalid_argument>("`upper` is stale.");
   }
-  if (upper < 0ul) {
-    IS_MAJSOUL_FAIR_THROW<std::invalid_argument>("`upper` must be non-negative.");
+  if (upper <= 0ul) {
+    IS_MAJSOUL_FAIR_THROW<std::invalid_argument>("`upper` must be positive.");
   }
   p_impl_->setToRandom(state.p_impl_->get(), *upper.p_impl_);
   return *this;
@@ -520,18 +517,6 @@ Integer &Integer::setToRandom(IntegerRandomState &state, Integer const &upper)
 Integer &Integer::setToRandom(
   IntegerRandomState &state, Integer const &lower, Integer const &upper)
 {
-  if (!p_impl_) {
-    IS_MAJSOUL_FAIR_THROW<std::invalid_argument>("`p_impl_` is `nullptr`.");
-  }
-  if (!state.p_impl_) {
-    IS_MAJSOUL_FAIR_THROW<std::invalid_argument>("`state.p_impl_` is `nullptr`.");
-  }
-  if (!lower.p_impl_) {
-    IS_MAJSOUL_FAIR_THROW<std::invalid_argument>("`lower.p_impl_` is `nullptr`.");
-  }
-  if (!upper.p_impl_) {
-    IS_MAJSOUL_FAIR_THROW<std::invalid_argument>("`upper.p_impl_` is `nullptr`.");
-  }
   if (lower >= upper) {
     IS_MAJSOUL_FAIR_THROW<std::invalid_argument>("`lower` must be less than `upper`.");
   }
@@ -542,24 +527,38 @@ Integer &Integer::setToRandom(
 Integer::operator unsigned long() const
 {
   if (!p_impl_) {
-    IS_MAJSOUL_FAIR_THROW<std::invalid_argument>("`p_impl_` is `nullptr`.");
+    IS_MAJSOUL_FAIR_THROW<std::invalid_argument>("`*this` is stale.");
   }
   if (*this < 0ul) {
     IS_MAJSOUL_FAIR_THROW<std::underflow_error>("Underflow occurred.");
   }
-  if (*this > Integer(ULONG_MAX)) {
+  if (*this > ULONG_MAX) {
     IS_MAJSOUL_FAIR_THROW<std::overflow_error>("Overflow occurred.");
   }
   return static_cast<unsigned long>(*p_impl_);
 }
 
+Integer::operator long() const
+{
+  if (!p_impl_) {
+    IS_MAJSOUL_FAIR_THROW<std::invalid_argument>("`*this` is stale.");
+  }
+  if (*this < LONG_MIN) {
+    IS_MAJSOUL_FAIR_THROW<std::underflow_error>("Underflow occurred.");
+  }
+  if (*this > LONG_MAX) {
+    IS_MAJSOUL_FAIR_THROW<std::overflow_error>("Overflow occurred.");
+  }
+  return static_cast<long>(*p_impl_);
+}
+
 bool Integer::operator==(Integer const &rhs) const
 {
   if (!p_impl_) {
-    IS_MAJSOUL_FAIR_THROW<std::invalid_argument>("`p_impl_` is `nullptr`.");
+    IS_MAJSOUL_FAIR_THROW<std::invalid_argument>("`*this` is stale.");
   }
   if (!rhs.p_impl_) {
-    IS_MAJSOUL_FAIR_THROW<std::invalid_argument>("`rhs.p_impl_` is `nullptr`.");
+    IS_MAJSOUL_FAIR_THROW<std::invalid_argument>("`rhs` is stale.");
   }
   return *p_impl_ == *rhs.p_impl_;
 }
@@ -567,7 +566,7 @@ bool Integer::operator==(Integer const &rhs) const
 bool Integer::operator==(unsigned long const rhs) const
 {
   if (!p_impl_) {
-    IS_MAJSOUL_FAIR_THROW<std::invalid_argument>("`p_impl_` is `nullptr`.");
+    IS_MAJSOUL_FAIR_THROW<std::invalid_argument>("`*this` is stale.");
   }
   return *p_impl_ == rhs;
 }
@@ -575,7 +574,7 @@ bool Integer::operator==(unsigned long const rhs) const
 bool Integer::operator==(long const rhs) const
 {
   if (!p_impl_) {
-    IS_MAJSOUL_FAIR_THROW<std::invalid_argument>("`p_impl_` is `nullptr`.");
+    IS_MAJSOUL_FAIR_THROW<std::invalid_argument>("`*this` is stale.");
   }
   return *p_impl_ == rhs;
 }
@@ -598,10 +597,10 @@ bool Integer::operator!=(long const rhs) const
 bool Integer::operator<(Integer const &rhs) const
 {
   if (!p_impl_) {
-    IS_MAJSOUL_FAIR_THROW<std::invalid_argument>("`p_impl_` is `nullptr`.");
+    IS_MAJSOUL_FAIR_THROW<std::invalid_argument>("`*this` is stale.");
   }
   if (!rhs.p_impl_) {
-    IS_MAJSOUL_FAIR_THROW<std::invalid_argument>("`rhs.p_impl_` is `nullptr`.");
+    IS_MAJSOUL_FAIR_THROW<std::invalid_argument>("`rhs` is stale.");
   }
   return *p_impl_ < *rhs.p_impl_;
 }
@@ -609,7 +608,7 @@ bool Integer::operator<(Integer const &rhs) const
 bool Integer::operator<(unsigned long const rhs) const
 {
   if (!p_impl_) {
-    IS_MAJSOUL_FAIR_THROW<std::invalid_argument>("`p_impl_` is `nullptr`.");
+    IS_MAJSOUL_FAIR_THROW<std::invalid_argument>("`*this` is stale.");
   }
   return *p_impl_ < rhs;
 }
@@ -617,7 +616,7 @@ bool Integer::operator<(unsigned long const rhs) const
 bool Integer::operator<(long const rhs) const
 {
   if (!p_impl_) {
-    IS_MAJSOUL_FAIR_THROW<std::invalid_argument>("`p_impl_` is `nullptr`.");
+    IS_MAJSOUL_FAIR_THROW<std::invalid_argument>("`*this` is stale.");
   }
   return *p_impl_ < rhs;
 }
@@ -630,7 +629,7 @@ bool Integer::operator<=(Integer const &rhs) const
 bool Integer::operator<=(unsigned long const rhs) const
 {
   if (!p_impl_) {
-    IS_MAJSOUL_FAIR_THROW<std::invalid_argument>("`p_impl_` is `nullptr`.");
+    IS_MAJSOUL_FAIR_THROW<std::invalid_argument>("`*this` is stale.");
   }
   return *p_impl_ <= rhs;
 }
@@ -638,7 +637,7 @@ bool Integer::operator<=(unsigned long const rhs) const
 bool Integer::operator<=(long const rhs) const
 {
   if (!p_impl_) {
-    IS_MAJSOUL_FAIR_THROW<std::invalid_argument>("`p_impl_` is `nullptr`.");
+    IS_MAJSOUL_FAIR_THROW<std::invalid_argument>("`*this` is stale.");
   }  
   return *p_impl_ <= rhs;
 }
@@ -651,7 +650,7 @@ bool Integer::operator>(Integer const &rhs) const
 bool Integer::operator>(unsigned long const rhs) const
 {
   if (!p_impl_) {
-    IS_MAJSOUL_FAIR_THROW<std::invalid_argument>("`p_impl_` is `nullptr`.");
+    IS_MAJSOUL_FAIR_THROW<std::invalid_argument>("`*this` is stale.");
   }
   return *p_impl_ > rhs;
 }
@@ -659,7 +658,7 @@ bool Integer::operator>(unsigned long const rhs) const
 bool Integer::operator>(long const rhs) const
 {
   if (!p_impl_) {
-    IS_MAJSOUL_FAIR_THROW<std::invalid_argument>("`p_impl_` is `nullptr`.");
+    IS_MAJSOUL_FAIR_THROW<std::invalid_argument>("`*this` is stale.");
   }  
   return *p_impl_ > rhs;
 }
@@ -672,7 +671,7 @@ bool Integer::operator>=(Integer const &rhs) const
 bool Integer::operator>=(unsigned long const rhs) const
 {
   if (!p_impl_) {
-    IS_MAJSOUL_FAIR_THROW<std::invalid_argument>("`p_impl_` is `nullptr`.");
+    IS_MAJSOUL_FAIR_THROW<std::invalid_argument>("`*this` is stale.");
   }
   return *p_impl_ >= rhs;
 }
@@ -680,7 +679,7 @@ bool Integer::operator>=(unsigned long const rhs) const
 bool Integer::operator>=(long const rhs) const
 {
   if (!p_impl_) {
-    IS_MAJSOUL_FAIR_THROW<std::invalid_argument>("`p_impl_` is `nullptr`.");
+    IS_MAJSOUL_FAIR_THROW<std::invalid_argument>("`*this` is stale.");
   }
   return *p_impl_ >= rhs;
 }
@@ -733,13 +732,13 @@ Integer operator%(unsigned long const lhs, Integer const &rhs)
 double divideAsDouble(Integer const &numerator, Integer const &denominator)
 {
   if (!numerator.p_impl_) {
-    IS_MAJSOUL_FAIR_THROW<std::invalid_argument>("`numerator.p_impl_` is `nullptr`.");
+    IS_MAJSOUL_FAIR_THROW<std::invalid_argument>("`numerator` is stale.");
   }
   if (!denominator.p_impl_) {
-    IS_MAJSOUL_FAIR_THROW<std::invalid_argument>("`denominator.p_impl_` is `nullptr`.");
+    IS_MAJSOUL_FAIR_THROW<std::invalid_argument>("`denominator` is stale.");
   }
   if (denominator == 0ul) {
-    IS_MAJSOUL_FAIR_THROW<std::invalid_argument>("`denominator` is zero.");
+    IS_MAJSOUL_FAIR_THROW<std::invalid_argument>("`denominator` must not be zero.");
   }
   return numerator.p_impl_->divideAsDouble(*denominator.p_impl_);
 }
