@@ -118,6 +118,11 @@ popd
   boost.stacktrace.from_exception=off
 rm -rf /workspaces/boost
 
+# Install Nyanten.
+pushd /workspaces
+git clone https://github.com/Cryolite/nyanten.git
+popd
+
 # Install NIST Statistical Test Suite.
 pushd /workspaces
 NIST_STASTICAL_TEST_SUITE_ZIP_NAME="$(basename "$NIST_STASTICAL_TEST_SUITE_URL")"
@@ -134,6 +139,14 @@ make -f makefile 'GCCFLAGS=-c -Wall -O3'
 popd
 popd
 
-pushd /workspaces/is-majsoul-fair/src/common
+pushd /workspaces/is-majsoul-fair
+pushd src/common
 protoc --cpp_out=. mahjongsoul.proto
+popd
+rm -rf build
+mkdir build
+pushd build
+cmake .. -DCMAKE_BUILD_TYPE=Debug -DNYANTEN_ROOT=/workspaces/nyanten
+make -j VERBOSE=1
+popd
 popd

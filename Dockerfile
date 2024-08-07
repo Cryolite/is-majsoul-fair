@@ -7,12 +7,14 @@ ARG GMP_URL="https://ftp.gnu.org/gnu/gmp/gmp-6.3.0.tar.xz"
 ARG ABSEIL_CPP_URL="https://github.com/abseil/abseil-cpp/releases/download/20240116.2/abseil-cpp-20240116.2.tar.gz"
 ARG PROTOBUF_URL="https://github.com/protocolbuffers/protobuf/releases/download/v27.2/protobuf-27.2.tar.gz"
 ARG NIST_STASTICAL_TEST_SUITE_URL="https://csrc.nist.gov/CSRC/media/Projects/Random-Bit-Generation/documents/sts-2_1_2.zip"
+ARG BUILD_TYPE="Release"
 FROM ubuntu:${UBUNTU_VERSION}
 ARG UBUNTU_VERSION
 ARG GMP_URL
 ARG ABSEIL_CPP_URL
 ARG PROTOBUF_URL
 ARG NIST_STASTICAL_TEST_SUITE_URL
+ARG BUILD_TYPE
 
 SHELL ["/bin/bash", "-c"]
 
@@ -126,6 +128,12 @@ RUN set -euxo pipefail; \
       boost.stacktrace.from_exception=off; \
     rm -rf /workspace/boost
 
+# Install Nyanten.
+RUN set -euxo pipefail; \
+    pushd /workspace; \
+    git clone 'https://github.com/Cryolite/nyanten.git'; \
+    popd
+
 # Install NIST Statistical Test Suite.
 RUN set -euxo pipefail; \
     pushd /workspace; \
@@ -146,8 +154,16 @@ RUN set -euxo pipefail; \
 COPY --chown=ubuntu:ubuntu . /workspace/is-majsoul-fair
 
 RUN set -euxo pipefail; \
-    pushd /workspace/is-majsoul-fair/src/common; \
+    pushd /workspace/is-majsoul-fair; \
+    pushd src/common; \
     protoc --cpp_out=. mahjongsoul.proto; \
+    popd; \
+    rm -rf build; \
+    mkdir build; \
+    pushd build; \
+    cmake .. "-DCMAKE_BUILD_TYPE=$BUILD_TYPE" -DNYANTEN_ROOT=/workspace/nyanten; \
+    make -j VERBOSE=1; \
+    popd; \
     popd
 
 WORKDIR /workspace/is-majsoul-fair

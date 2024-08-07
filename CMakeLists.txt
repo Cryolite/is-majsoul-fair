@@ -12,6 +12,11 @@ message("CMAKE_CXX_COMPILER=${CMAKE_CXX_COMPILER}")
 
 set(CMAKE_CXX_STANDARD 23)
 
+if (DEFINED NYANTEN_ROOT)
+  message("NYANTEN_ROOT=${NYANTEN_ROOT}")
+  include_directories(${NYANTEN_ROOT})
+endif()
+
 if (CMAKE_BUILD_TYPE STREQUAL "")
   set(CMAKE_BUILD_TYPE Debug)
 endif()
