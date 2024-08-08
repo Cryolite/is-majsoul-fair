@@ -187,7 +187,7 @@ void process(std::filesystem::path const &ph, std::string uuid) {
     IS_MAJSOUL_FAIR_THROW<std::logic_error>("A logic error.");
   }();
 
-  char chang;
+  std::size_t chang;
   std::size_t ju;
   std::size_t ben;
 
@@ -232,20 +232,8 @@ void process(std::filesystem::path const &ph, std::string uuid) {
     else if (wrapper.name() == ".lq.RecordNewRound") {
       lq::RecordNewRound record;
       record.ParseFromString(wrapper.data());
-      switch (record.chang()) {
-      case 0u:
-        chang = 'E';
-        break;
-      case 1u:
-        chang = 'S';
-        break;
-      case 2u:
-        chang = 'W';
-        break;
-      default:
-        break;
-      }
-      ju = record.ju() + 1;
+      chang = record.chang();
+      ju = record.ju();
       ben = record.ben();
 
       std::vector<std::string> qipai0;
@@ -307,12 +295,12 @@ void process(std::filesystem::path const &ph, std::string uuid) {
         IS_MAJSOUL_FAIR_THROW<std::logic_error>("A logic error.");
       }
 
-      std::cout << uuid << '\t' << toString(qipai0_) << '\t' << toString(qipai1_) << '\t' << toString(qipai2_);
+      std::cout << uuid << '\t' << chang << '\t' << ju << '\t' << ben << '\t'
+        << toString(qipai0_) << '\t' << toString(qipai1_) << '\t' << toString(qipai2_);
       if (qipai3_.size() != 0u) {
         std::cout << '\t' << toString(qipai3_);
       }
       std::cout << '\t' << toString(paishan) << '\n';
-      return;
     }
     else if (wrapper.name() == ".lq.RecordNoTile") {
       lq::RecordNoTile record;
