@@ -240,54 +240,46 @@ void process(std::filesystem::path const &ph, std::string uuid) {
       ju = record.ju();
       ben = record.ben();
 
-      std::vector<std::string> qipai0;
-      std::vector<std::string> qipai1;
-      std::vector<std::string> qipai2;
-      std::vector<std::string> qipai3;
-      switch (record.ju()) {
-      case 0:
-        qipai0.assign(record.tiles0().cbegin(), record.tiles0().cend());
-        qipai1.assign(record.tiles1().cbegin(), record.tiles1().cend());
-        qipai2.assign(record.tiles2().cbegin(), record.tiles2().cend());
-        qipai3.assign(record.tiles3().cbegin(), record.tiles3().cend());
-        break;
-      case 1:
-        qipai0.assign(record.tiles1().cbegin(), record.tiles1().cend());
-        qipai1.assign(record.tiles2().cbegin(), record.tiles2().cend());
-        qipai2.assign(record.tiles3().cbegin(), record.tiles3().cend());
-        qipai3.assign(record.tiles0().cbegin(), record.tiles0().cend());
-        break;
-      case 2:
-        qipai0.assign(record.tiles2().cbegin(), record.tiles2().cend());
-        qipai1.assign(record.tiles3().cbegin(), record.tiles3().cend());
-        qipai2.assign(record.tiles0().cbegin(), record.tiles0().cend());
-        qipai3.assign(record.tiles1().cbegin(), record.tiles1().cend());
-        break;
-      case 3:
-        qipai0.assign(record.tiles3().cbegin(), record.tiles3().cend());
-        qipai1.assign(record.tiles0().cbegin(), record.tiles0().cend());
-        qipai2.assign(record.tiles1().cbegin(), record.tiles1().cend());
-        qipai3.assign(record.tiles2().cbegin(), record.tiles2().cend());
-        break;
-      default:
-        IS_MAJSOUL_FAIR_THROW<std::runtime_error>(_1) << uuid << ", " << chang << ju << '-' << ben;
-      }
+      std::vector<std::string> qipai0(record.tiles0().cbegin(), record.tiles0().cend());
+      std::vector<std::string> qipai1(record.tiles1().cbegin(), record.tiles1().cend());
+      std::vector<std::string> qipai2(record.tiles2().cbegin(), record.tiles2().cend());
+      std::vector<std::string> qipai3(record.tiles3().cbegin(), record.tiles3().cend());
 
       std::vector<std::uint_fast8_t> const qipai0_ = restoreQipai(qipai0);
-      if (qipai0_.size() != 14u) {
-        IS_MAJSOUL_FAIR_THROW<std::runtime_error>(_1) << uuid << ": " << qipai0_.size();
+      if (qipai0_.size() != 13u && qipai0_.size() != 14u) {
+        IS_MAJSOUL_FAIR_THROW<std::runtime_error>(_1)
+          << uuid << " (" << chang << '-' << ju << '-' << ben << "): " << qipai0_.size();
+      }
+      if ((ju == 0u) != (qipai0_.size() == 14u)) {
+        IS_MAJSOUL_FAIR_THROW<std::runtime_error>(_1)
+          << uuid << " (" << chang << '-' << ju << '-' << ben << "): " << qipai0_.size();
       }
       std::vector<std::uint_fast8_t> const qipai1_ = restoreQipai(qipai1);
-      if (qipai1_.size() != 13u) {
-        IS_MAJSOUL_FAIR_THROW<std::runtime_error>(_1) << uuid << ": " << qipai1_.size();
+      if (qipai1_.size() != 13u && qipai1_.size() != 14u) {
+        IS_MAJSOUL_FAIR_THROW<std::runtime_error>(_1)
+          << uuid << " (" << chang << '-' << ju << '-' << ben << "): " << qipai1_.size();
+      }
+      if ((ju == 1u) != (qipai1_.size() == 14u)) {
+        IS_MAJSOUL_FAIR_THROW<std::runtime_error>(_1)
+          << uuid << " (" << chang << '-' << ju << '-' << ben << "): " << qipai1_.size();
       }
       std::vector<std::uint_fast8_t> const qipai2_ = restoreQipai(qipai2);
-      if (qipai2_.size() != 13u) {
-        IS_MAJSOUL_FAIR_THROW<std::runtime_error>(_1) << uuid << ": " << qipai2_.size();
+      if (qipai2_.size() != 13u && qipai2_.size() != 14u) {
+        IS_MAJSOUL_FAIR_THROW<std::runtime_error>(_1)
+          << uuid << " (" << chang << '-' << ju << '-' << ben << "): " << qipai2_.size();
+      }
+      if ((ju == 2u) != (qipai2_.size() == 14u)) {
+        IS_MAJSOUL_FAIR_THROW<std::runtime_error>(_1)
+          << uuid << " (" << chang << '-' << ju << '-' << ben << "): " << qipai2_.size();
       }
       std::vector<std::uint_fast8_t> const qipai3_ = restoreQipai(qipai3);
-      if (qipai3_.size() != 13u && qipai3_.size() != 0u) {
-        IS_MAJSOUL_FAIR_THROW<std::runtime_error>(_1) << uuid << ": " << qipai3_.size();
+      if (qipai3_.size() != 13u && qipai3_.size() != 14u && qipai3_.size() != 0u) {
+        IS_MAJSOUL_FAIR_THROW<std::runtime_error>(_1)
+          << uuid << " (" << chang << '-' << ju << '-' << ben << "): " << qipai3_.size();
+      }
+      if ((ju == 3u) != (qipai3_.size() == 14u)) {
+        IS_MAJSOUL_FAIR_THROW<std::runtime_error>(_1)
+          << uuid << " (" << chang << '-' << ju << '-' << ben << "): " << qipai3_.size();
       }
       std::vector<std::uint_fast8_t> const paishan = restorePaishan(record.paishan());
       if (game_record_version == 0u || game_record_version == 210715u) {
