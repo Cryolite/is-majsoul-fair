@@ -209,6 +209,10 @@ void process(std::filesystem::path const &ph, std::string uuid) {
       lq::RecordAnGangAddGang record;
       record.ParseFromString(wrapper.data());
     }
+    else if (wrapper.name() == ".lq.RecordBaBei") {
+      lq::RecordBaBei record;
+      record.ParseFromString(wrapper.data());
+    }
     else if (wrapper.name() == ".lq.RecordChiPengGang") {
       lq::RecordChiPengGang record;
       record.ParseFromString(wrapper.data());
