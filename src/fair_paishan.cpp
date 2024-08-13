@@ -84,13 +84,14 @@ std::vector<std::uint_fast8_t> createPaishan(std::size_t const num_tiles, std::m
 int main(int const argc, char const * const * const argv)
 {
   if (argc != 3) {
-    std::cerr << "Usage: " << argv[0] << " [83|136] <# of paishan>" << std::endl;
+    std::cerr << "Usage: " << argv[0] << " <83|136> <# of paishan>" << std::endl;
     return EXIT_FAILURE;
   }
 
   std::size_t const num_tiles = boost::lexical_cast<std::size_t>(argv[1u]);
   if (num_tiles != 83u && num_tiles != 136u) {
-    std::cerr << "The first argument must be either `83` or `136`." << std::endl;
+    std::cerr << "The first argument must be either `83` or `136`, but it is `"
+      << num_tiles << "`." << std::endl;
     return EXIT_FAILURE;
   }
 
