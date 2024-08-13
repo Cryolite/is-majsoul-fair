@@ -120,12 +120,19 @@ void print(
 {
   {
     bool has_zhuangjia = false;
-    for (auto const &q : qipai) {
-      if (q.size() != 13u && q.size() != 14u) {
-        IS_MAJSOUL_FAIR_THROW<std::logic_error>(_1)
-          << uuid << " (" << chang << '-' << ju << '-' << ben << "): " << q.size();
+    for (std::uint_fast8_t seat = 0u; seat < 4u; ++seat) {
+      if (qipai[seat].size() == 0u) {
+        if (seat != 3u) {
+          IS_MAJSOUL_FAIR_THROW<std::logic_error>(_1)
+            << uuid << " (" << chang << '-' << ju << '-' << ben << ')';
+        }
+        continue;
       }
-      if (q.size() == 14u) {
+      if (qipai[seat].size() != 13u && qipai[seat].size() != 14u) {
+        IS_MAJSOUL_FAIR_THROW<std::logic_error>(_1)
+          << uuid << " (" << chang << '-' << ju << '-' << ben << "): " << qipai[seat].size();
+      }
+      if (qipai[seat].size() == 14u) {
         if (has_zhuangjia) {
           IS_MAJSOUL_FAIR_THROW<std::logic_error>(_1)
             << uuid << " (" << chang << '-' << ju << '-' << ben << ')';
