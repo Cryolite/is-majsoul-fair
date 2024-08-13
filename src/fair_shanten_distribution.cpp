@@ -102,7 +102,7 @@ int main(int const argc, char const * const * const argv) {
   }
   else {
     std::vector<std::jthread> threads;
-    for (std::size_t i = 0u; i < 10u; ++i) {
+    for (std::size_t i = 0u; i < num_threads; ++i) {
       threads.emplace_back(
         &threadMain, num_tiles, num_simulations, std::ref(calculator), std::ref(table));
     }
