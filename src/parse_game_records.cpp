@@ -491,17 +491,27 @@ void process(std::filesystem::path const &path, std::string uuid) {
           // Do nothing.
         }
         else {
-          if (score.delta_scores().size() != 4u) {
-            IS_MAJSOUL_FAIR_THROW<std::runtime_error>(_1)
-              << uuid << " (" << chang << '-' << ju << '-' << ben << "): "
-              << score.delta_scores().size();
+          if (score.delta_scores().size() == 4u) {
+            delta_scores = {
+              score.delta_scores(0u),
+              score.delta_scores(1u),
+              score.delta_scores(2u),
+              score.delta_scores(3u),
+            };
           }
-          delta_scores = {
-            score.delta_scores(0u),
-            score.delta_scores(1u),
-            score.delta_scores(2u),
-            score.delta_scores(3u),
-          };
+          else {
+            if (score.delta_scores().size() != 3u) {
+              IS_MAJSOUL_FAIR_THROW<std::runtime_error>(_1)
+                << uuid << " (" << chang << '-' << ju << '-' << ben << "): "
+                << score.delta_scores().size();
+            }
+            delta_scores = {
+              score.delta_scores(0u),
+              score.delta_scores(1u),
+              score.delta_scores(2u),
+              0,
+            };
+          }
         }
       }
       else {
