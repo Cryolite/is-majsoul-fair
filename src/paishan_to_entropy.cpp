@@ -35,7 +35,8 @@ double paishanToEntropy(std::vector<std::uint_fast8_t> const &paishan, std::size
 int main(int const argc, char const * const * const argv)
 {
   if (argc != 3) {
-    IS_MAJSOUL_FAIR_THROW<std::invalid_argument>("The number of arguments is invalid.");
+    std::cerr << "Usage: " << argv[0] << " <path to paishan file> <# of bits per paishan>" << std::endl;
+    return EXIT_FAILURE;
   }
 
   std::filesystem::path const path(argv[1]);

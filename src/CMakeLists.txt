@@ -27,21 +27,21 @@ target_link_libraries(core
   PRIVATE common
   PRIVATE gmp)
 
-add_executable(shanten
-  shanten.cpp)
-target_link_libraries(shanten
+add_executable(fair_shanten_distribution
+  fair_shanten_distribution.cpp)
+target_link_libraries(fair_shanten_distribution
   PRIVATE common
   PRIVATE Boost::headers)
 
-add_executable(unbiased_paishan
-  unbiased_paishan.cpp)
-target_link_libraries(unbiased_paishan
+add_executable(fair_paishan
+  fair_paishan.cpp)
+target_link_libraries(fair_paishan
   PRIVATE common
   PRIVATE Boost::headers)
 
-add_executable(paishan
-  paishan.cpp)
-target_link_libraries(paishan
+add_executable(parse_game_records
+  parse_game_records.cpp)
+target_link_libraries(parse_game_records
   PRIVATE common
   PRIVATE Boost::headers)
 
