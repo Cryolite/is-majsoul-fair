@@ -350,16 +350,27 @@ void process(std::filesystem::path const &path, std::string uuid) {
       lq::RecordHule record;
       record.ParseFromString(wrapper.data());
 
-      if (record.scores().size() != 4u) {
-        IS_MAJSOUL_FAIR_THROW<std::runtime_error>(_1)
-          << uuid << " (" << chang << '-' << ju << '-' << ben << "): " << record.scores().size();
+      std::array<long, 4u> delta_scores;
+      if (record.scores().size() == 4u) {
+        delta_scores = {
+          record.scores(0u) - old_scores[0u],
+          record.scores(1u) - old_scores[1u],
+          record.scores(2u) - old_scores[2u],
+          record.scores(3u) - old_scores[3u],
+        };
       }
-      std::array<long, 4u> delta_scores{
-        record.scores(0u) - old_scores[0u],
-        record.scores(1u) - old_scores[1u],
-        record.scores(2u) - old_scores[2u],
-        record.scores(3u) - old_scores[3u],
-      };
+      else {
+        if (record.scores().size() != 3u) {
+          IS_MAJSOUL_FAIR_THROW<std::runtime_error>(_1)
+            << uuid << " (" << chang << '-' << ju << '-' << ben << "): " << record.scores().size();
+        }
+        delta_scores = {
+          record.scores(0u) - old_scores[0u],
+          record.scores(1u) - old_scores[1u],
+          record.scores(2u) - old_scores[2u],
+          0,
+        };
+      }
       print(uuid, chang, ju, ben, qipai, paishan, zimo, delta_scores);
 
       for (auto &q : qipai) {
