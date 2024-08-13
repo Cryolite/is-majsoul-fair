@@ -538,12 +538,12 @@ void process(std::filesystem::path const &path, std::string uuid) {
             IS_MAJSOUL_FAIR_THROW<std::runtime_error>(_1)
               << uuid << " (" << chang << '-' << ju << '-' << ben << "): " << score.seat();
           }
-          if (score.delta_scores().size() != 4u) {
+          if (score.delta_scores().size() != 4u && score.delta_scores().size() != 3u) {
             IS_MAJSOUL_FAIR_THROW<std::runtime_error>(_1)
               << uuid << " (" << chang << '-' << ju << '-' << ben << "): "
               << score.delta_scores().size();
           }
-          for (std::uint_fast8_t i = 0u; i < 4u; ++i) {
+          for (std::uint_fast8_t i = 0u; i < score.delta_scores().size(); ++i) {
             delta_scores[i] += score.delta_scores(i);
           }
         }
