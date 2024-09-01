@@ -8,8 +8,8 @@ add_library(common
   common/mahjongsoul.pb.cc)
 target_link_libraries(common
   PRIVATE Boost::stacktrace_backtrace
-  PRIVATE Boost::headers
-  PRIVATE ${Protobuf_LIBRARIES}
+  INTERFACE Boost::headers
+  PRIVATE protobuf::libprotobuf
   PRIVATE absl::log_internal_check_op
   PRIVATE absl::log_internal_conditions
   PRIVATE absl::raw_hash_set
@@ -42,8 +42,7 @@ target_link_libraries(fair_paishan
 add_executable(parse_game_records
   parse_game_records.cpp)
 target_link_libraries(parse_game_records
-  PRIVATE common
-  PRIVATE Boost::headers)
+  PRIVATE common)
 
 add_executable(paishan_to_entropy
   paishan_to_entropy.cpp)
