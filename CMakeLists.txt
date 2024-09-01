@@ -102,11 +102,8 @@ endif()
 find_package(absl REQUIRED)
 find_package(Protobuf REQUIRED)
 
-find_package(Boost
-  REQUIRED
-  COMPONENTS stacktrace_backtrace)
+find_package(Boost_stacktrace_backtrace REQUIRED)
 
 add_compile_definitions(BOOST_STACKTRACE_USE_BACKTRACE)
 
 add_subdirectory(src)
-#add_subdirectory(test)
