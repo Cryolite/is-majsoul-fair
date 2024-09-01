@@ -581,7 +581,13 @@ void walk(std::filesystem::path const &ph, std::string const &suffix) {
       std::filesystem::path const path = iter->path();
       std::string const path_str = path.string();
       if (suffix.empty()) {
-        process(path, "");
+        try {
+          process(path, "");
+        }
+        catch (std::exception const &e) {
+          std::cerr << path_str << ": " << e.what() << std::endl;
+          std::cerr << "Failed to parse the file. Continue to the next file." << std::endl;
+        }
         continue;
       }
       if (path_str.size() < suffix.size()) {
@@ -589,7 +595,13 @@ void walk(std::filesystem::path const &ph, std::string const &suffix) {
       }
       if (path_str.compare(path_str.size() - suffix.size(), suffix.size(), suffix) == 0) {
         std::string const filename = path.filename().string();
-        process(path, filename.substr(0, filename.size() - suffix.size()));
+        try {
+          process(path, filename.substr(0, filename.size() - suffix.size()));
+        }
+        catch (std::exception const &e) {
+          std::cerr << path_str << ": " << e.what() << std::endl;
+          std::cerr << "Failed to parse the file. Continue to the next file." << std::endl;
+        }
         continue;
       }
     }
