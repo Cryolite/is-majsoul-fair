@@ -12,10 +12,14 @@ message("CMAKE_CXX_COMPILER=${CMAKE_CXX_COMPILER}")
 
 set(CMAKE_CXX_STANDARD 23)
 
-if (DEFINED NYANTEN_ROOT)
-  message("NYANTEN_ROOT=${NYANTEN_ROOT}")
-  include_directories(${NYANTEN_ROOT})
+if ((NOT DEFINED NYANTEN_ROOT) OR (NYANTEN_ROOT STREQUAL ""))
+  message(FATAL_ERROR "`NYANTEN_ROOT` is not defined.")
 endif()
+if (NOT EXISTS ${NYANTEN_ROOT})
+  message(FATAL_ERROR "`NYANTEN_ROOT` does not exist.")
+endif()
+message("NYANTEN_ROOT=${NYANTEN_ROOT}")
+include_directories(${NYANTEN_ROOT})
 
 if (CMAKE_BUILD_TYPE STREQUAL "")
   set(CMAKE_BUILD_TYPE Debug)
