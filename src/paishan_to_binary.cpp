@@ -15,6 +15,7 @@
 #include <string_view>
 #include <string>
 #include <functional>
+#include <cstdint>
 #include <cstdlib>
 
 
@@ -29,9 +30,21 @@ void paishanToBinary(
 {
   IsMajsoulFair::Interval const interval = IsMajsoulFair::permutationToInterval(paishan);
   std::vector<unsigned char> const binary = IsMajsoulFair::intervalToBinary(interval, num_bits, state);
-  for (unsigned char bit : binary) {
-    std::cout << static_cast<unsigned>(bit);
+  if (binary.size() % 8u != 0u) {
+    IS_MAJSOUL_FAIR_THROW<std::runtime_error>(_1) << binary.size();
   }
+  for (std::size_t i = 0u; i < binary.size(); i += 8u) {
+    std::uint8_t const byte = binary[i + 0u] << 7u
+                            | binary[i + 1u] << 6u
+                            | binary[i + 2u] << 5u
+                            | binary[i + 3u] << 4u
+                            | binary[i + 4u] << 3u
+                            | binary[i + 5u] << 2u
+                            | binary[i + 6u] << 1u
+                            | binary[i + 7u] << 0u;
+    std::cout << byte;
+  }
+  std::cout << std::flush;
 }
 
 } // namespace <unnamed>
@@ -39,7 +52,7 @@ void paishanToBinary(
 int main(int const argc, char const * const * const argv)
 {
   if (argc != 3) {
-    std::cerr << "Usage: " << argv[0] << " <path to paishan file> <# of bits per paishan>" << std::endl;
+    std::cerr << "Usage: " << argv[0] << " <PATH TO PAISHAN FILE> <# OF BITS PER PAISHAN>" << std::endl;
     return EXIT_FAILURE;
   }
 
@@ -51,7 +64,14 @@ int main(int const argc, char const * const * const argv)
     IS_MAJSOUL_FAIR_THROW<std::runtime_error>(_1) << path.string() << ": Failed to open.";
   }
 
-  std::size_t const num_bits = boost::lexical_cast<std::size_t>(argv[2]);
+  long long const num_bits = boost::lexical_cast<long long>(argv[2]);
+  if (num_bits <= 0) {
+    IS_MAJSOUL_FAIR_THROW<std::invalid_argument>(_1) << num_bits << ": An invalid number of bits.";
+  }
+  if (num_bits % 8 != 0) {
+    IS_MAJSOUL_FAIR_THROW<std::invalid_argument>(_1)
+      << num_bits << ": The number of bits must be a multiple of 8.";
+  }
 
   while (true) {
     std::string line;
