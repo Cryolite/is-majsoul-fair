@@ -3,7 +3,7 @@
 // This file is part of https://github.com/Cryolite/is-majsoul-fair.
 
 #include "common/throw.hpp"
-#include <nyanten/calculator.hpp>
+#include <nyanten/replacement_number.hpp>
 #include <boost/lexical_cast.hpp>
 #include <atomic>
 #include <thread>
@@ -48,14 +48,13 @@ std::array<std::uint_fast8_t, 34u> createQipai(
 void threadMain(
   std::uint_fast8_t const num_tiles,
   std::size_t const num_simulations,
-  Nyanten::Calculator const &calculator,
   std::array<std::atomic_size_t, 8u> &table)
 {
   std::mt19937 random_number_engine = createRandomNumberEngine();
 
   for (std::size_t i = 0; i < num_simulations; ++i) {
     std::array<std::uint_fast8_t, 34u> const qipai = createQipai(num_tiles, random_number_engine);
-    std::uint_fast8_t const replacement_number = calculator(qipai);
+    std::uint_fast8_t const replacement_number = Nyanten::calculateReplacementNumber(qipai);
     ++table[replacement_number];
   }
 }
@@ -94,17 +93,15 @@ int main(int const argc, char const * const * const argv) {
     return 1u;
   }();
 
-  Nyanten::Calculator calculator(nyanten_map_path);
-
   std::array<std::atomic_size_t, 8u> table{};
   if (num_threads == 1u) {
-    threadMain(num_tiles, num_simulations, calculator, table);
+    threadMain(num_tiles, num_simulations, table);
   }
   else {
     std::vector<std::jthread> threads;
     for (std::size_t i = 0u; i < num_threads; ++i) {
       threads.emplace_back(
-        &threadMain, num_tiles, num_simulations, std::ref(calculator), std::ref(table));
+        &threadMain, num_tiles, num_simulations, std::ref(table));
     }
     for (std::jthread &thread : threads) {
       thread.join();
