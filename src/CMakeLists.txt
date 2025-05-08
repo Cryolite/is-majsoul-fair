@@ -22,9 +22,12 @@ add_library(core
   core/covering_binary_interval.cpp
   core/permutation_to_interval.cpp
   core/interval.cpp
-  core/integer.cpp)
+  core/integer.cpp
+  core/paishan_reader.cpp
+  core/fair_paishan.cpp)
 target_link_libraries(core
   PRIVATE common
+  PRIVATE Boost::headers
   PRIVATE gmp)
 
 add_executable(fair_shanten_distribution
@@ -57,3 +60,5 @@ target_link_libraries(paishan_to_binary
   PRIVATE core
   PRIVATE common
   PRIVATE Boost::headers)
+
+add_subdirectory(original)
